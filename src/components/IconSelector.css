@@ -1,0 +1,39 @@
+.icon-selector {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.icon-option {
+  padding: 12px;
+  border: 2px solid var(--border);
+  background-color: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  transition: all 0.2s;
+}
+
+.icon-option:hover {
+  border-color: var(--text);
+  background-color: var(--bg-card);
+}
+
+.icon-option.active {
+  border-color: var(--text);
+  background-color: var(--bg-card);
+  box-shadow: 0 0 0 1px var(--text);
+}
+
+.icon-option img {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
+}
+
+[data-theme='light'] .icon-option img {
+  filter: invert(1) brightness(0.1);
+}

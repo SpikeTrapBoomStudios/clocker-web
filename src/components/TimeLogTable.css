@@ -1,0 +1,106 @@
+.table-container {
+  flex: 1;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.time-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 18.9px;
+}
+
+.time-log-table thead {
+  background-color: var(--bg);
+  position: sticky;
+  top: 0;
+}
+
+.time-log-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  background-color: var(--bg);
+}
+
+.time-log-table th:last-child {
+  border-right: none;
+}
+
+.time-log-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  color: var(--text);
+}
+
+.time-log-table th.sortable:hover {
+  background-color: var(--bg-light);
+}
+
+.time-log-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.time-log-table td:last-child {
+  border-right: none;
+}
+
+
+.time-log-table tr:hover {
+  background-color: var(--bg-light);
+}
+
+.time-log-table .active-row {
+  background-color: rgba(16, 185, 129, 0.15);
+  font-weight: 500;
+}
+
+.empty-cell {
+  text-align: center;
+  color: var(--text-light);
+  padding: 32px 12px !important;
+}
+
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-edit,
+.btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background-color: transparent;
+  color: var(--text);
+  font-size: 19.5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-edit:hover {
+  background-color: var(--bg-light);
+}
+
+.btn-delete {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: rgb(239, 68, 68);
+}
+
+.btn-delete:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}

@@ -1,0 +1,182 @@
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.dialog {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.dialog h2 {
+  margin: 0 0 24px 0;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 21px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 21px;
+  font-family: inherit;
+  background-color: var(--bg-light);
+  color: var(--text);
+}
+
+.dialog-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 28px;
+}
+
+.dialog-buttons button {
+  flex: 1;
+}
+
+@property --lucky-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.lucky-row {
+  margin-top: 16px;
+  display: flex;
+}
+
+.lucky-border-wrap {
+  flex: 1;
+  position: relative;
+  border-radius: 10px;
+  isolation: isolate;
+}
+
+.lucky-border-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  background: conic-gradient(from var(--lucky-angle), #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0088ff, #8800ff, #ff0000);
+  z-index: -1;
+  animation: rainbow-river 2s linear infinite;
+}
+
+.btn-lucky {
+  width: 100%;
+  position: relative;
+  background: rgba(8, 5, 15, 0.93);
+  border: none;
+  color: #e0d8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.btn-lucky::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: conic-gradient(from var(--lucky-angle), #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0088ff, #8800ff, #ff0000);
+  filter: blur(32px);
+  opacity: 0.35;
+  animation: rainbow-river 2s linear infinite;
+}
+
+@keyframes rainbow-river {
+  to { --lucky-angle: 360deg; }
+}
+
+.lucky-border-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 12px;
+  background: conic-gradient(from var(--lucky-angle), #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0088ff, #8800ff, #ff0000);
+  filter: blur(14px);
+  opacity: 0;
+  z-index: -2;
+  animation: rainbow-river 2s linear infinite;
+  transition: opacity 0.6s ease;
+}
+
+.lucky-border-wrap:hover::after {
+  opacity: 0.7;
+  transition: opacity 0.6s ease;
+}
+
+.input-over {
+  border-color: rgb(239, 68, 68) !important;
+  outline: none;
+  box-shadow: none;
+}
+
+.input-over:focus {
+  border-color: rgb(239, 68, 68) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+}
+
+.field-error {
+  margin: 6px 0 0 0;
+  font-size: 13px;
+  color: rgb(239, 68, 68);
+}
+
+.field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.field-label-row label {
+  margin-bottom: 0;
+}
+
+.char-counter {
+  font-size: 13px;
+  color: var(--text-light);
+  opacity: 0.5;
+  transition: color 0.2s, opacity 0.2s;
+  font-variant-numeric: tabular-nums;
+}
+
+.char-counter.near {
+  opacity: 1;
+  color: rgb(234, 179, 8);
+}
+
+.char-counter.over {
+  opacity: 1;
+  color: rgb(239, 68, 68);
+  font-weight: 600;
+}

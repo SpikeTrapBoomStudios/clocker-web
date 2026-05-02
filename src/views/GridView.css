@@ -1,0 +1,118 @@
+.grid-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg);
+}
+
+.grid-header h1 {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.header-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.header-controls .btn-primary,
+.projects-header-actions .btn-primary {
+  font-size: 16.8px;
+}
+
+.projects-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px;
+}
+
+.projects-container {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.projects-title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 32px;
+  align-content: start;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: var(--text-light);
+  font-size: 24px;
+}
+
+.btn-select {
+  font-size: 16.8px;
+  background: transparent;
+  color: var(--text);
+  border: 2px dashed var(--border);
+}
+
+.btn-select.active {
+  border-style: solid;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-select:hover {
+  background-color: var(--bg-light);
+}
+
+.projects-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  min-height: 42px;
+}
+
+.projects-title {
+  margin: 0;
+}
+
+.projects-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-delete-selected {
+  font-size: 15px;
+}
+
+.btn-settings {
+  font-size: 24px;
+  width: 42px;
+  height: 42px;
+  padding: 0 0 1px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

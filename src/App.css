@@ -1,0 +1,177 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #F5F0E8;
+  --primary-dark: #DDD8CF;
+  --danger: #a05555;
+  --danger-hover: #8b4949;
+  --success: #5a8f6f;
+  --text: #e8e8e8;
+  --text-light: #a0a0a0;
+  --border: #2a2a2a;
+  --bg: #0f0f0f;
+  --bg-light: #1a1a1a;
+  --bg-card: #1a1a1a;
+}
+
+body {
+  color: var(--text);
+  background-color: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  margin: 0;
+  padding: 0;
+  letter-spacing: 0.4px;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+}
+
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  font-size: 21px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+input, textarea, select {
+  background-color: var(--bg-light);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-family: inherit;
+  transition: all 0.2s;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--text);
+  box-shadow: 0 0 0 3px rgba(245, 240, 232, 0.1);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: #0f0f0f;
+  border: 1px solid var(--primary);
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: #0f0f0f;
+}
+
+.btn-primary:disabled {
+  background-color: var(--bg-light);
+  border-color: var(--border);
+  color: var(--text-light);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-card);
+  border-color: var(--text-light);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: white;
+  border: 1px solid var(--danger);
+}
+
+.btn-danger:hover {
+  background-color: var(--danger-hover);
+  border-color: var(--danger-hover);
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 21.12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-back-icon {
+  width: 27px;
+  height: 27px;
+  opacity: 0.8;
+}
+
+.btn-back:hover {
+  opacity: 0.7;
+}
+
+.btn-back:hover .btn-back-icon {
+  opacity: 1;
+}
+
+.btn-clock {
+  font-size: 27px;
+  padding: 8px 16px;
+  background-color: var(--success);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn-clock:hover {
+  opacity: 0.9;
+}
+
+.btn-clock.active {
+  background-color: var(--danger);
+}
+
+.btn-edit,
+.btn-delete {
+  padding: 0;
+  font-size: 54px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  margin-right: 8px;
+  opacity: 0.7;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-edit:hover,
+.btn-delete:hover {
+  opacity: 1;
+}
+
+.btn-delete {
+  color: var(--danger);
+}
+

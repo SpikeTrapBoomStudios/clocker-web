@@ -1,0 +1,145 @@
+.detail-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg);
+  position: relative;
+}
+
+.btn-back {
+  position: absolute;
+  left: 32px;
+}
+
+.header-actions {
+  position: absolute;
+  right: 32px;
+}
+
+.project-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.project-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.project-icon-img {
+  width: 48px;
+  height: 48px;
+  filter: brightness(0) invert(1);
+  flex-shrink: 0;
+}
+
+[data-theme='light'] .project-icon-img {
+  filter: invert(1) brightness(0.1);
+}
+
+.project-info h1 {
+  margin: 0;
+  font-size: 29.4px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.project-info p {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 16.898px;
+  text-align: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.header-actions button {
+  font-size: 16.8px;
+}
+
+.clock-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  padding: 72px 32px;
+  background-color: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.elapsed {
+  text-align: center;
+}
+
+.elapsed-label {
+  display: block;
+  color: var(--text-light);
+  font-size: 13.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.elapsed-time {
+  display: block;
+  font-size: 27px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1px;
+}
+
+.logs-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 32px;
+}
+
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logs-header h2 {
+  margin: 0;
+  font-size: 20.25px;
+  font-weight: 600;
+}
+
+.logs-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.logs-actions button {
+  font-size: 15.75px;
+}
+
+.total-section {
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  text-align: right;
+  color: var(--text);
+  font-size: 27px;
+  font-weight: 600;
+}

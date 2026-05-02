@@ -1,0 +1,15 @@
+.dialog form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group input[type="date"],
+.form-group input[type="time"] {
+  background-color: var(--bg-light);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 21px;
+}
