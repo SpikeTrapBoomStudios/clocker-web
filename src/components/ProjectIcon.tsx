@@ -8,23 +8,28 @@ import bookmarkSvg from '../assets/bookmark.svg';
 import terminalSvg from '../assets/terminal.svg';
 import graduationCapSvg from '../assets/graduation_cap.svg';
 import pencilSvg from '../assets/pencil.svg';
+import { IconId } from '../types';
 
-const ICON_MAP = {
-  clock: clockSvg,
-  code: codeSvg,
-  wrench: wrenchSvg,
-  folder: folderSvg,
-  chart: chartSvg,
-  game: gameSvg,
-  bookmark: bookmarkSvg,
-  terminal: terminalSvg,
+const ICON_MAP: Record<IconId, string> = {
+  clock:      clockSvg,
+  code:       codeSvg,
+  wrench:     wrenchSvg,
+  folder:     folderSvg,
+  chart:      chartSvg,
+  game:       gameSvg,
+  bookmark:   bookmarkSvg,
+  terminal:   terminalSvg,
   graduation: graduationCapSvg,
-  pencil: pencilSvg,
+  pencil:     pencilSvg,
 };
 
-function ProjectIcon({ iconId, className = '' }) {
-  const svg = ICON_MAP[iconId] || ICON_MAP.clock;
-  return <img src={svg} alt="icon" className={className} />;
+interface Props {
+  iconId: IconId;
+  className?: string;
+}
+
+function ProjectIcon({ iconId, className = '' }: Props) {
+  return <img src={ICON_MAP[iconId] ?? ICON_MAP.clock} alt="icon" className={className} />;
 }
 
 export default ProjectIcon;

@@ -8,22 +8,28 @@ import bookmarkSvg from '../assets/bookmark.svg';
 import terminalSvg from '../assets/terminal.svg';
 import graduationCapSvg from '../assets/graduation_cap.svg';
 import pencilSvg from '../assets/pencil.svg';
+import { IconId } from '../types';
 import './IconSelector.css';
 
-const ICONS = [
-  { id: 'clock', label: 'Clock', svg: clockSvg },
-  { id: 'code', label: 'Code', svg: codeSvg },
-  { id: 'wrench', label: 'Wrench', svg: wrenchSvg },
-  { id: 'folder', label: 'Folder', svg: folderSvg },
-  { id: 'chart', label: 'Chart', svg: chartSvg },
-  { id: 'game', label: 'Game', svg: gameSvg },
-  { id: 'bookmark', label: 'Bookmark', svg: bookmarkSvg },
-  { id: 'terminal', label: 'Terminal', svg: terminalSvg },
+const ICONS: { id: IconId; label: string; svg: string }[] = [
+  { id: 'clock',      label: 'Clock',    svg: clockSvg },
+  { id: 'code',       label: 'Code',     svg: codeSvg },
+  { id: 'wrench',     label: 'Wrench',   svg: wrenchSvg },
+  { id: 'folder',     label: 'Folder',   svg: folderSvg },
+  { id: 'chart',      label: 'Chart',    svg: chartSvg },
+  { id: 'game',       label: 'Game',     svg: gameSvg },
+  { id: 'bookmark',   label: 'Bookmark', svg: bookmarkSvg },
+  { id: 'terminal',   label: 'Terminal', svg: terminalSvg },
   { id: 'graduation', label: 'Learning', svg: graduationCapSvg },
-  { id: 'pencil', label: 'Pencil', svg: pencilSvg },
+  { id: 'pencil',     label: 'Pencil',   svg: pencilSvg },
 ];
 
-function IconSelector({ selectedIcon, onSelect }) {
+interface Props {
+  selectedIcon: IconId;
+  onSelect: (icon: IconId) => void;
+}
+
+function IconSelector({ selectedIcon, onSelect }: Props) {
   return (
     <div className="icon-selector">
       {ICONS.map(icon => (

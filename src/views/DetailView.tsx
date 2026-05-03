@@ -1,45 +1,52 @@
 import { useState, useEffect } from 'react';
-import { LocalStorage } from '../utils/LocalStorage.js';
-import { formatDuration, formatTime, formatDate, getDurationSeconds, isActive } from '../utils/timeUtils';
+import { Storage } from '../utils/Storage';
+import { formatDuration, formatTime, formatDate, getDurationSeconds, isActive } from '../utils/TimeUtils';
 import TimeLogTable from '../components/TimeLogTable';
 import EditLogDialog from '../components/EditLogDialog';
 import NewProjectDialog from '../components/NewProjectDialog';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ProjectIcon from '../components/ProjectIcon';
 import arrowBackIcon from '../assets/arrow_back.svg';
+import { Project, ProjectFormData, TimeLog } from '../types';
 import './DetailView.css';
 
-function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
-  const [logs, setLogs] = useState([]);
+interface Props {
+  project: Project;
+  projects?: Project[];
+  onBack: () => void;
+  onEdit: (data: ProjectFormData) => void;
+  onDelete: (projectId: string) => void;
+  onActiveChange: (active: boolean) => void;
+}
+
+function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActiveChange }: Props) {
+  const [logs, setLogs] = useState<TimeLog[]>([]);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [clockedIn, setClockedIn] = useState(false);
-  const [clockInTime, setClockInTime] = useState(null);
+  const [clockInTime, setClockInTime] = useState<Date | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editingLog, setEditingLog] = useState(null);
+  const [editingLog, setEditingLog] = useState<TimeLog | null>(null);
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [sortColumn, setSortColumn] = useState(0);
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
-    const loaded = LocalStorage.loadLogs(project.id);
-    setLogs(loaded);
-    syncClockState(loaded);
+    Storage.loadLogs(project.id).then(loadedLogs => {
+      setLogs(loadedLogs);
+      syncClockState(loadedLogs);
+    });
   }, [project.id]);
 
   useEffect(() => {
-    if (!clockedIn) return;
-
+    if (!clockedIn || !clockInTime) return;
     const interval = setInterval(() => {
-      const now = new Date();
-      const elapsed = Math.floor((now - clockInTime) / 1000);
-      setElapsedSeconds(elapsed);
+      setElapsedSeconds(Math.floor((new Date().getTime() - clockInTime.getTime()) / 1000));
     }, 100);
-
     return () => clearInterval(interval);
   }, [clockedIn, clockInTime]);
 
-  const syncClockState = (logList) => {
+  const syncClockState = (logList: TimeLog[]) => {
     const activeLog = logList.find(log => isActive(log));
     if (activeLog) {
       setClockedIn(true);
@@ -52,43 +59,28 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
 
   const handleClockToggle = () => {
     const now = new Date();
-    const newLogs = [...logs];
+    const updatedLogs = [...logs];
 
     if (clockedIn) {
-      const activeIndex = newLogs.findIndex(log => isActive(log));
-      if (activeIndex >= 0) {
-        newLogs[activeIndex].endTime = now;
-      }
+      const activeIndex = updatedLogs.findIndex(log => isActive(log));
+      if (activeIndex >= 0) updatedLogs[activeIndex] = { ...updatedLogs[activeIndex], endTime: now };
       setClockedIn(false);
       setElapsedSeconds(0);
     } else {
-      newLogs.push({
-        date: now,
-        startTime: now,
-        endTime: null,
-      });
+      updatedLogs.push({ date: now, startTime: now, endTime: null });
       setClockedIn(true);
       setClockInTime(now);
     }
 
-    setLogs(newLogs);
-    LocalStorage.saveLogs(project.id, newLogs);
+    setLogs(updatedLogs);
+    Storage.saveLogs(project.id, updatedLogs);
+    onActiveChange(!clockedIn);
   };
 
-  const handleAddEntry = () => {
-    setEditingLog(null);
-    setShowEditDialog(true);
-  };
-
-  const handleEditRow = (log) => {
-    setEditingLog(log);
-    setShowEditDialog(true);
-  };
-
-  const handleDeleteRow = (index) => {
-    const newLogs = logs.filter((_, i) => i !== index);
-    setLogs(newLogs);
-    LocalStorage.saveLogs(project.id, newLogs);
+  const handleDeleteRow = (index: number) => {
+    const updatedLogs = logs.filter((_, i) => i !== index);
+    setLogs(updatedLogs);
+    Storage.saveLogs(project.id, updatedLogs);
   };
 
   const handleEditDialogClose = () => {
@@ -96,16 +88,17 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
     setEditingLog(null);
   };
 
-  const handleEditDialogSubmit = (log) => {
+  const handleEditDialogSubmit = (log: TimeLog) => {
+    let updatedLogs: TimeLog[];
     if (editingLog) {
       const index = logs.indexOf(editingLog);
-      const newLogs = [...logs];
-      newLogs[index] = log;
-      setLogs(newLogs);
+      updatedLogs = [...logs];
+      updatedLogs[index] = log;
     } else {
-      setLogs([...logs, log]);
+      updatedLogs = [...logs, log];
     }
-    LocalStorage.saveLogs(project.id, logs);
+    setLogs(updatedLogs);
+    Storage.saveLogs(project.id, updatedLogs);
     handleEditDialogClose();
   };
 
@@ -117,12 +110,7 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
       log.endTime ? formatTime(log.endTime) : '(Active)',
       formatDuration(getDurationSeconds(log.startTime, log.endTime)),
     ]);
-
-    const csv = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
-    ].join('\n');
-
+    const csv = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const downloadLink = document.createElement('a');
@@ -132,7 +120,7 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
     URL.revokeObjectURL(url);
   };
 
-  const handleSort = (column) => {
+  const handleSort = (column: number) => {
     if (sortColumn === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
@@ -141,29 +129,19 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
     }
   };
 
-  const getTotalSeconds = () => {
-    return logs.reduce((sum, log) => sum + getDurationSeconds(log.startTime, log.endTime), 0);
-  };
+  const getTotalSeconds = () =>
+    logs.reduce((sum, log) => sum + getDurationSeconds(log.startTime, log.endTime), 0);
 
-  const getSortedLogs = () => {
-    const sorted = [...logs];
-    sorted.sort((firstLog, secondLog) => {
-      let firstValue, secondValue;
-      if (sortColumn === 0) { // Date
-        firstValue = firstLog.date;
-        secondValue = secondLog.date;
-      } else if (sortColumn === 1) { // Duration
-        firstValue = getDurationSeconds(firstLog.startTime, firstLog.endTime);
-        secondValue = getDurationSeconds(secondLog.startTime, secondLog.endTime);
-      }
-
-      if (sortOrder === 'asc') {
-        return firstValue > secondValue ? 1 : -1;
+  const getSortedLogs = (): TimeLog[] => {
+    return [...logs].sort((firstLog, secondLog) => {
+      if (sortColumn === 0) {
+        const diff = firstLog.date.getTime() - secondLog.date.getTime();
+        return sortOrder === 'asc' ? diff : -diff;
       } else {
-        return firstValue < secondValue ? 1 : -1;
+        const diff = getDurationSeconds(firstLog.startTime, firstLog.endTime) - getDurationSeconds(secondLog.startTime, secondLog.endTime);
+        return sortOrder === 'asc' ? diff : -diff;
       }
     });
-    return sorted;
   };
 
   return (
@@ -187,10 +165,7 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
       </div>
 
       <div className="clock-section">
-        <button
-          className={`btn-clock ${clockedIn ? 'active' : ''}`}
-          onClick={handleClockToggle}
-        >
+        <button className={`btn-clock ${clockedIn ? 'active' : ''}`} onClick={handleClockToggle}>
           {clockedIn ? 'Clock Out' : 'Clock In'}
         </button>
         <div className="elapsed">
@@ -203,31 +178,25 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
         <div className="logs-header">
           <h2>Time Logs</h2>
           <div className="logs-actions">
-            <button className="btn-secondary" onClick={handleAddEntry}>+ Add Entry</button>
+            <button className="btn-secondary" onClick={() => { setEditingLog(null); setShowEditDialog(true); }}>+ Add Entry</button>
             <button className="btn-secondary" onClick={handleExportCsv}>Export CSV</button>
           </div>
         </div>
-
         <TimeLogTable
           logs={getSortedLogs()}
-          onEdit={handleEditRow}
+          onEdit={(log) => { setEditingLog(log); setShowEditDialog(true); }}
           onDelete={handleDeleteRow}
           onSort={handleSort}
           sortColumn={sortColumn}
           sortOrder={sortOrder}
         />
-
         <div className="total-section">
           <strong>Total: {formatDuration(getTotalSeconds())}</strong>
         </div>
       </div>
 
       {showEditDialog && (
-        <EditLogDialog
-          log={editingLog}
-          onClose={handleEditDialogClose}
-          onSubmit={handleEditDialogSubmit}
-        />
+        <EditLogDialog log={editingLog} onClose={handleEditDialogClose} onSubmit={handleEditDialogSubmit} />
       )}
 
       {showProjectDialog && (
@@ -235,20 +204,14 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
           project={project}
           projects={projects}
           onClose={() => setShowProjectDialog(false)}
-          onSubmit={(updated) => {
-            onEdit(updated);
-            setShowProjectDialog(false);
-          }}
+          onSubmit={(data) => { onEdit(data); setShowProjectDialog(false); }}
         />
       )}
 
       {showDeleteConfirm && (
         <ConfirmDialog
           message={`Delete "${project.name}"?`}
-          onConfirm={() => {
-            onDelete(project.id);
-            setShowDeleteConfirm(false);
-          }}
+          onConfirm={() => { onDelete(project.id); setShowDeleteConfirm(false); }}
           onCancel={() => setShowDeleteConfirm(false)}
         />
       )}

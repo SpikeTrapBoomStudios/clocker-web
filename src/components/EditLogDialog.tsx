@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react';
+import { TimeLog } from '../types';
 import './EditLogDialog.css';
 
-function EditLogDialog({ log, onClose, onSubmit }) {
+interface Props {
+  log: TimeLog | null;
+  onClose: () => void;
+  onSubmit: (log: TimeLog) => void;
+}
+
+function EditLogDialog({ log, onClose, onSubmit }: Props) {
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
@@ -19,31 +26,32 @@ function EditLogDialog({ log, onClose, onSubmit }) {
     }
   }, [log]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !startTime) return;
 
-    const [year, month, day] = date.split('-');
-    const [startHour, startMinute] = startTime.split(':');
-    const newDate = new Date(year, month - 1, day);
+    const [yearStr, monthStr, dayStr] = date.split('-');
+    const year = parseInt(yearStr, 10);
+    const month = parseInt(monthStr, 10);
+    const day = parseInt(dayStr, 10);
 
+    const [startHourStr, startMinuteStr] = startTime.split(':');
+    const startHour = parseInt(startHourStr, 10);
+    const startMinute = parseInt(startMinuteStr, 10);
+
+    const newDate = new Date(year, month - 1, day);
     const newStartTime = new Date(year, month - 1, day, startHour, startMinute);
+
     const newEndTime = endTime
       ? (() => {
-          const [endHour, endMinute] = endTime.split(':');
-          let endDate = new Date(year, month - 1, day, endHour, endMinute);
-          if (endDate < newStartTime) {
-            endDate.setDate(endDate.getDate() + 1);
-          }
+          const [endHourStr, endMinuteStr] = endTime.split(':');
+          const endDate = new Date(year, month - 1, day, parseInt(endHourStr, 10), parseInt(endMinuteStr, 10));
+          if (endDate < newStartTime) endDate.setDate(endDate.getDate() + 1);
           return endDate;
         })()
       : null;
 
-    onSubmit({
-      date: newDate,
-      startTime: newStartTime,
-      endTime: newEndTime,
-    });
+    onSubmit({ date: newDate, startTime: newStartTime, endTime: newEndTime });
   };
 
   return (
@@ -53,24 +61,12 @@ function EditLogDialog({ log, onClose, onSubmit }) {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Date *</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
           </div>
-
           <div className="form-group">
             <label>Start Time *</label>
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              required
-            />
+            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
           </div>
-
           <div className="form-group">
             <label>End Time</label>
             <input
@@ -80,7 +76,6 @@ function EditLogDialog({ log, onClose, onSubmit }) {
               placeholder="Leave empty if ongoing"
             />
           </div>
-
           <div className="dialog-buttons">
             <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn-primary">Save</button>

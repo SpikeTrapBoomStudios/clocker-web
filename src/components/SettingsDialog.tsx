@@ -1,24 +1,27 @@
 import { useState } from 'react';
-import { LocalStorage } from '../utils/LocalStorage.js';
+import { DEFAULT_DELETE_PHRASE, DEFAULT_INVERT_ORBIT, DEFAULT_ORBIT_STRENGTH } from '../utils/SettingsDefaults';
+import { LocalStorage } from '../utils/LocalStorage';
 import './SettingsDialog.css';
 
 const hasHover = window.matchMedia('(hover: hover)').matches;
 
-function SettingsDialog({ onClose }) {
+interface Props {
+  onClose: () => void;
+}
+
+function SettingsDialog({ onClose }: Props) {
   const [deletePhrase, setDeletePhrase] = useState(LocalStorage.getDeletePhrase());
   const [orbitStrength, setOrbitStrength] = useState(LocalStorage.getOrbitStrength());
   const [invertOrbit, setInvertOrbit] = useState(LocalStorage.getInvertOrbit());
 
   const resetOrbitStrength = () => {
-    const val = LocalStorage.getDefaultOrbitStrength();
-    setOrbitStrength(val);
-    LocalStorage.setOrbitStrength(val);
+    setOrbitStrength(DEFAULT_ORBIT_STRENGTH);
+    LocalStorage.setOrbitStrength(DEFAULT_ORBIT_STRENGTH);
   };
 
   const resetInvertOrbit = () => {
-    const val = LocalStorage.getDefaultInvertOrbit();
-    setInvertOrbit(val);
-    LocalStorage.setInvertOrbit(val);
+    setInvertOrbit(DEFAULT_INVERT_ORBIT);
+    LocalStorage.setInvertOrbit(DEFAULT_INVERT_ORBIT);
   };
 
   return (
@@ -43,9 +46,9 @@ function SettingsDialog({ onClose }) {
               step="0.5"
               value={orbitStrength}
               onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                setOrbitStrength(val);
-                LocalStorage.setOrbitStrength(val);
+                const newStrength = parseFloat(e.target.value);
+                setOrbitStrength(newStrength);
+                LocalStorage.setOrbitStrength(newStrength);
               }}
             />
             <span className="strength-value">{orbitStrength.toFixed(1)}</span>
@@ -73,16 +76,25 @@ function SettingsDialog({ onClose }) {
         <div className="setting setting-slider setting-text-entry">
           <div className="setting-title-row">
             <h3>Bulk Delete Confirmation Phrase</h3>
-            <button className="btn-reset" onClick={() => { setDeletePhrase(LocalStorage.getDefaultDeletePhrase()); LocalStorage.setDeletePhrase(LocalStorage.getDefaultDeletePhrase()); }} title="Reset to default">↻</button>
+            <button
+              className="btn-reset"
+              onClick={() => {
+                setDeletePhrase(DEFAULT_DELETE_PHRASE);
+                LocalStorage.setDeletePhrase(DEFAULT_DELETE_PHRASE);
+              }}
+              title="Reset to default"
+            >↻</button>
           </div>
           <input
             type="text"
             value={deletePhrase}
-            onChange={(e) => { setDeletePhrase(e.target.value); LocalStorage.setDeletePhrase(e.target.value); }}
+            onChange={(e) => {
+              setDeletePhrase(e.target.value);
+              LocalStorage.setDeletePhrase(e.target.value);
+            }}
             style={{ width: '100%', marginTop: '8px', fontSize: '1.0em' }}
           />
         </div>
-
       </div>
     </div>
   );

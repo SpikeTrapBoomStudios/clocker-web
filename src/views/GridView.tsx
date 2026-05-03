@@ -1,12 +1,14 @@
 import { useState, useRef, useMemo } from 'react';
+import type { User } from 'firebase/auth';
 import accountCircleIcon from '../assets/account_circle.svg';
-
 import ProjectTile from '../components/ProjectTile';
 import NewProjectDialog from '../components/NewProjectDialog';
 import SettingsDialog from '../components/SettingsDialog';
 import PhraseConfirmDialog from '../components/PhraseConfirmDialog';
-import { LocalStorage } from '../utils/LocalStorage.js';
-import { getDurationSeconds, isActive } from '../utils/timeUtils';
+import SignInDialog from '../components/SignInDialog';
+import { LocalStorage } from '../utils/LocalStorage';
+import { getDurationSeconds, isActive } from '../utils/TimeUtils';
+import { Project, ProjectFormData } from '../types';
 import './GridView.css';
 
 const SORT_OPTIONS = [
@@ -18,14 +20,27 @@ const SORT_OPTIONS = [
   { value: 'name-desc',    label: 'Name Z–A' },
 ];
 
-function GridView({ projects, onProjectSelect, onAddProject, onDeleteProject, onDeleteProjects, user, onSignIn, onSignOut }) {
+interface Props {
+  projects: Project[];
+  onProjectSelect: (project: Project) => void;
+  onAddProject: (data: ProjectFormData) => void;
+  onDeleteProjects: (projectIds: string[]) => void;
+  onStarProject: (projectId: string) => void;
+  user: User | null | undefined;
+  onGoogleSignIn: () => void;
+  onGithubSignIn: () => void;
+  onSignOut: () => void;
+}
+
+function GridView({ projects, onProjectSelect, onAddProject, onDeleteProjects, onStarProject, user, onGoogleSignIn, onGithubSignIn, onSignOut }: Props) {
   const [showDialog, setShowDialog] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [selectedIds, setSelectedIds] = useState(new Set<string>());
   const [showPhraseConfirm, setShowPhraseConfirm] = useState(false);
-  const [mousePos, setMousePos] = useState(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const [sortMethod, setSortMethod] = useState(() => LocalStorage.getSortMethod());
   const hasHover = useRef(window.matchMedia('(hover: hover)').matches);
 
@@ -33,46 +48,48 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProject, on
     return projects.map(project => {
       const logs = LocalStorage.loadLogs(project.id);
       const totalSeconds = logs.reduce((sum, log) => {
-        if (isActive(log)) return sum + Math.floor((new Date() - log.startTime) / 1000);
+        if (isActive(log)) return sum + Math.floor((new Date().getTime() - log.startTime.getTime()) / 1000);
         return sum + getDurationSeconds(log.startTime, log.endTime);
       }, 0);
       const mostRecentDate = logs.reduce((max, log) => {
-        const t = log.startTime ? log.startTime.getTime() : 0;
-        return t > max ? t : max;
+        const time = log.startTime ? log.startTime.getTime() : 0;
+        return time > max ? time : max;
       }, 0);
       return { id: project.id, totalSeconds, mostRecentDate };
     });
   }, [projects]);
 
   const sortedProjects = useMemo(() => {
-    const statsMap = new Map(projectStats.map(s => [s.id, s]));
-    return [...projects].sort((a, b) => {
-      const sa = statsMap.get(a.id);
-      const sb = statsMap.get(b.id);
+    const statsMap = new Map(projectStats.map(stats => [stats.id, stats]));
+    const comparator = (projectA: Project, projectB: Project) => {
+      const statsA = statsMap.get(projectA.id)!;
+      const statsB = statsMap.get(projectB.id)!;
       switch (sortMethod) {
-        case 'most-time':    return sb.totalSeconds - sa.totalSeconds;
-        case 'least-time':   return sa.totalSeconds - sb.totalSeconds;
-        case 'most-recent':  return sb.mostRecentDate - sa.mostRecentDate;
-        case 'least-recent': return sa.mostRecentDate - sb.mostRecentDate;
-        case 'name-asc':     return a.name.localeCompare(b.name);
-        case 'name-desc':    return b.name.localeCompare(a.name);
+        case 'most-time':    return statsB.totalSeconds - statsA.totalSeconds;
+        case 'least-time':   return statsA.totalSeconds - statsB.totalSeconds;
+        case 'most-recent':  return statsB.mostRecentDate - statsA.mostRecentDate;
+        case 'least-recent': return statsA.mostRecentDate - statsB.mostRecentDate;
+        case 'name-asc':     return projectA.name.localeCompare(projectB.name);
+        case 'name-desc':    return projectB.name.localeCompare(projectA.name);
         default:             return 0;
       }
-    });
+    };
+    const starred = projects.filter(p => p.starred).sort(comparator);
+    const unstarred = projects.filter(p => !p.starred).sort(comparator);
+    return [...starred, ...unstarred];
   }, [projects, projectStats, sortMethod]);
 
-  const handleSortChange = (e) => {
-    const method = e.target.value;
-    setSortMethod(method);
-    LocalStorage.setSortMethod(method);
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortMethod(e.target.value);
+    LocalStorage.setSortMethod(e.target.value);
   };
 
   const toggleSelectMode = () => {
-    setSelectMode(isSelectMode => !isSelectMode);
+    setSelectMode(current => !current);
     setSelectedIds(new Set());
   };
 
-  const toggleTileSelect = (id) => {
+  const toggleTileSelect = (id: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -89,17 +106,13 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProject, on
     setShowPhraseConfirm(false);
   };
 
-  const handleTileClick = (project) => {
+  const handleTileClick = (project: Project) => {
     if (selectMode) {
       toggleTileSelect(project.id);
       return;
     }
     onProjectSelect(project);
   };
-
-  const handleAddClick = () => setShowDialog(true);
-  const handleDialogClose = () => setShowDialog(false);
-  const handleDialogSubmit = (project) => { onAddProject(project); setShowDialog(false); };
 
   return (
     <div
@@ -118,7 +131,7 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProject, on
                   <img src={accountCircleIcon} alt="Account" />
                 </button>
               </>
-            : <button className="btn-secondary btn-auth" onClick={onSignIn}>Sign in with Google</button>
+            : <button className="btn-secondary btn-auth" onClick={() => setShowSignIn(true)}>Sign In</button>
           }
         </div>
       </header>
@@ -131,14 +144,9 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProject, on
                 <h2 className="projects-title">My Projects</h2>
                 <div className="sort-control">
                   <label className="sort-label" htmlFor="sort-select">Sort:</label>
-                  <select
-                    id="sort-select"
-                    className="sort-select"
-                    value={sortMethod}
-                    onChange={handleSortChange}
-                  >
-                    {SORT_OPTIONS.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <select id="sort-select" className="sort-select" value={sortMethod} onChange={handleSortChange}>
+                    {SORT_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
                     ))}
                   </select>
                 </div>
@@ -150,7 +158,7 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProject, on
                   </button>
                 )}
                 <button className={`btn-select ${selectMode ? 'active' : ''}`} onClick={toggleSelectMode}>Select</button>
-                <button className="btn-primary" onClick={handleAddClick}>+ New Project</button>
+                <button className="btn-primary" onClick={() => setShowDialog(true)}>+ New Project</button>
               </div>
             </div>
             <div className="projects-grid">
@@ -167,6 +175,7 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProject, on
                     selectMode={selectMode}
                     selected={selectedIds.has(project.id)}
                     mousePos={mousePos}
+                    onStarToggle={() => onStarProject(project.id)}
                   />
                 ))
               )}
@@ -176,16 +185,26 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProject, on
       </div>
 
       {showDialog && (
-        <NewProjectDialog projects={projects} onClose={handleDialogClose} onSubmit={handleDialogSubmit} />
+        <NewProjectDialog
+          projects={projects}
+          onClose={() => setShowDialog(false)}
+          onSubmit={(data) => { onAddProject(data); setShowDialog(false); }}
+        />
       )}
 
-      {showSettings && (
-        <SettingsDialog onClose={() => setShowSettings(false)} />
+      {showSettings && <SettingsDialog onClose={() => setShowSettings(false)} />}
+
+      {showSignIn && (
+        <SignInDialog
+          onGoogleSignIn={() => { setShowSignIn(false); onGoogleSignIn(); }}
+          onGithubSignIn={() => { setShowSignIn(false); onGithubSignIn(); }}
+          onClose={() => setShowSignIn(false)}
+        />
       )}
 
-      {showAccount && (
+      {showAccount && user && (
         <div className="dialog-overlay" onClick={() => setShowAccount(false)}>
-          <div className="dialog" onClick={e => e.stopPropagation()}>
+          <div className="dialog" onClick={(e) => e.stopPropagation()}>
             <div className="dialog-header">
               <h2>Account</h2>
               <button className="btn-close" onClick={() => setShowAccount(false)}>✕</button>
@@ -204,6 +223,7 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProject, on
           onCancel={() => setShowPhraseConfirm(false)}
         />
       )}
+
     </div>
   );
 }

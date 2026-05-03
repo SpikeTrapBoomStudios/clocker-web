@@ -1,6 +1,12 @@
 import './ConfirmDialog.css';
 
-function ConfirmDialog({ message, onConfirm, onCancel }) {
+interface Props {
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function ConfirmDialog({ message, onConfirm, onCancel }: Props) {
   return (
     <div className="dialog-overlay" onClick={onCancel}>
       <div className="dialog confirm-dialog" onClick={(e) => e.stopPropagation()}>

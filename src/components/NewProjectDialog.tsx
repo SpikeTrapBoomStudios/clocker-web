@@ -1,8 +1,7 @@
 import { useState, useRef } from 'react';
 import IconSelector from './IconSelector';
+import { ICON_IDS, IconId, Project, ProjectFormData } from '../types';
 import './NewProjectDialog.css';
-
-const ICON_IDS = ['clock', 'code', 'wrench', 'folder', 'chart', 'game', 'bookmark', 'terminal', 'graduation', 'pencil'];
 
 const NAME_FIRST = [
   'Client', 'Admin', 'Analytics', 'Internal', 'Core', 'Cloud',
@@ -32,7 +31,7 @@ const SUGGESTION_LIBRARY = {
   adjective: ['lightweight', 'scalable', 'internal', 'client-facing', 'automated', 'real-time', 'self-hosted', '2D', '3D', 'top-down', 'side-scrolling', 'isometric', 'multiplayer'],
 };
 
-const DESC_TEMPLATES = [
+const DESC_TEMPLATES: (() => string)[] = [
   () => `A ${pick(SUGGESTION_LIBRARY.language)} ${pick(SUGGESTION_LIBRARY.type)} for managing ${pick(SUGGESTION_LIBRARY.task)} across ${pick(SUGGESTION_LIBRARY.team)}.`,
   () => `${pick(SUGGESTION_LIBRARY.adjective)} ${pick(SUGGESTION_LIBRARY.type)} for ${pick(SUGGESTION_LIBRARY.team)} to handle ${pick(SUGGESTION_LIBRARY.task)} and ${pick(SUGGESTION_LIBRARY.task2)}.`,
   () => `Internal ${pick(SUGGESTION_LIBRARY.language)}/${pick(SUGGESTION_LIBRARY.language)} service for ${pick(SUGGESTION_LIBRARY.task)} and ${pick(SUGGESTION_LIBRARY.task2)}.`,
@@ -45,15 +44,15 @@ const DESC_TEMPLATES = [
   () => `${pick(SUGGESTION_LIBRARY.language)} ${pick(SUGGESTION_LIBRARY.type)} handling ${pick(SUGGESTION_LIBRARY.task)} and ${pick(SUGGESTION_LIBRARY.task2)} for ${pick(SUGGESTION_LIBRARY.industry)}.`,
 ];
 
-function pick(arr) {
+function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function luckyName() {
+function luckyName(): string {
   return `${pick(NAME_FIRST)} ${pick(NAME_SECOND)}`;
 }
 
-function luckyDescription() {
+function luckyDescription(): string {
   const result = pick(DESC_TEMPLATES)();
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
@@ -61,18 +60,25 @@ function luckyDescription() {
 const NAME_MAX = 44;
 const DESCRIPTION_MAX = 95;
 
-function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
-  const [name, setName] = useState(project?.name || '');
-  const [description, setDescription] = useState(project?.description || '');
-  const [icon, setIcon] = useState(project?.icon || 'clock');
+interface Props {
+  project?: Project;
+  projects?: Project[];
+  onClose: () => void;
+  onSubmit: (data: ProjectFormData) => void;
+}
+
+function NewProjectDialog({ project, projects = [], onClose, onSubmit }: Props) {
+  const [name, setName] = useState(project?.name ?? '');
+  const [description, setDescription] = useState(project?.description ?? '');
+  const [icon, setIcon] = useState<IconId>(project?.icon ?? 'clock');
   const [nameError, setNameError] = useState('');
   const [spinning, setSpinning] = useState(false);
-  const spinRef = useRef(null);
+  const spinRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isDuplicate = (projectName) =>
-    projects.some(existingProject => existingProject.name.trim().toLowerCase() === projectName.trim().toLowerCase() && existingProject.id !== project?.id);
+  const isDuplicate = (projectName: string) =>
+    projects.some(existing => existing.name.trim().toLowerCase() === projectName.trim().toLowerCase() && existing.id !== project?.id);
 
-  const handleNameChange = (projectName) => {
+  const handleNameChange = (projectName: string) => {
     setName(projectName);
     setNameError(isDuplicate(projectName) ? 'A project with this name already exists.' : '');
   };
@@ -80,7 +86,7 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
   const nameCharsOver = name.length - NAME_MAX;
   const descriptionCharsOver = description.length - DESCRIPTION_MAX;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     if (isDuplicate(name)) { setNameError('A project with this name already exists.'); return; }
@@ -98,17 +104,15 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
     const finalIcon = pick(ICON_IDS);
 
     const duration = 1000 + Math.random() * 1000;
-    const extraCycles = 3 + Math.floor(Math.random() * 3); // 3–5 slow cycles at the end
+    const extraCycles = 3 + Math.floor(Math.random() * 3);
     const start = performance.now();
     let slowCyclesLeft = extraCycles;
     setSpinning(true);
     setNameError('');
 
-    const spin = (now) => {
+    const spin = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
-
-      // Interval slows from 60ms to 220ms as progress increases
       const interval = 60 + progress * 160;
 
       setName(luckyName());
@@ -177,7 +181,13 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
 
           <div className="dialog-buttons">
             <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn-primary" disabled={!!nameError || !name.trim() || spinning || nameCharsOver > 0 || descriptionCharsOver > 0}>{project ? 'Save' : 'Create'}</button>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={!!nameError || !name.trim() || spinning || nameCharsOver > 0 || descriptionCharsOver > 0}
+            >
+              {project ? 'Save' : 'Create'}
+            </button>
           </div>
 
           {!project && !name && !description && (

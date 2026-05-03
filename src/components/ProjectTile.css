@@ -25,6 +25,34 @@
   background-color: rgba(16, 185, 129, 0.08);
 }
 
+.tile-star {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile-star img {
+  width: 23px;
+  height: 23px;
+}
+
+.tile-star.starred {
+  opacity: 1;
+}
+
+.project-tile:hover .tile-star {
+  opacity: 1;
+}
+
 .tile-checkbox {
   position: absolute;
   top: 10px;

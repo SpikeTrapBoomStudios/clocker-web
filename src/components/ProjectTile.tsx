@@ -1,16 +1,28 @@
 import { useState, useEffect, useRef } from 'react';
-import { LocalStorage } from '../utils/LocalStorage.js';
-import { formatDuration, getDurationSeconds, isActive } from '../utils/timeUtils';
+import { LocalStorage } from '../utils/LocalStorage';
+import { formatDuration, getDurationSeconds, isActive } from '../utils/TimeUtils';
+import { Project } from '../types';
 import ProjectIcon from './ProjectIcon';
+import starUnfilledSvg from '../assets/star_unfilled.svg';
+import starFilledSvg from '../assets/star_filled.svg';
 import './ProjectTile.css';
 
-function ProjectTile({ project, onClick, selectMode, selected, mousePos }) {
+interface Props {
+  project: Project;
+  onClick: () => void;
+  selectMode: boolean;
+  selected: boolean;
+  mousePos: { x: number; y: number } | null;
+  onStarToggle: () => void;
+}
+
+function ProjectTile({ project, onClick, selectMode, selected, mousePos, onStarToggle }: Props) {
   const [baseTotalSeconds, setBaseTotalSeconds] = useState(0);
-  const [activeStartTime, setActiveStartTime] = useState(null);
+  const [activeStartTime, setActiveStartTime] = useState<Date | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
-  const tileRef = useRef(null);
+  const tileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const logs = LocalStorage.loadLogs(project.id);
@@ -18,19 +30,16 @@ function ProjectTile({ project, onClick, selectMode, selected, mousePos }) {
     const base = logs.reduce((sum, log) => isActive(log) ? sum : sum + getDurationSeconds(log.startTime, log.endTime), 0);
     setBaseTotalSeconds(base);
     setActiveStartTime(activeLog ? activeLog.startTime : null);
-    setElapsedSeconds(activeLog ? Math.floor((new Date() - activeLog.startTime) / 1000) : 0);
+    setElapsedSeconds(activeLog ? Math.floor((new Date().getTime() - activeLog.startTime.getTime()) / 1000) : 0);
   }, [project.id]);
 
   useEffect(() => {
     if (!activeStartTime) return;
     const interval = setInterval(() => {
-      setElapsedSeconds(Math.floor((new Date() - activeStartTime) / 1000));
+      setElapsedSeconds(Math.floor((new Date().getTime() - activeStartTime.getTime()) / 1000));
     }, 1000);
     return () => clearInterval(interval);
   }, [activeStartTime]);
-
-  const totalTime = baseTotalSeconds + elapsedSeconds;
-  const isClocked = !!activeStartTime;
 
   useEffect(() => {
     if (!tileRef.current || !mousePos) {
@@ -53,11 +62,10 @@ function ProjectTile({ project, onClick, selectMode, selected, mousePos }) {
     });
   }, [mousePos]);
 
-  const classes = [
-    'project-tile',
-    selected ? 'selected' : '',
-  ].filter(Boolean).join(' ');
+  const totalTime = baseTotalSeconds + elapsedSeconds;
+  const isClocked = !!activeStartTime;
 
+  const classes = ['project-tile', selected ? 'selected' : ''].filter(Boolean).join(' ');
   const transform = `perspective(1200px) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(${hovered ? 1.07 : 1}) translateZ(0)`;
 
   return (
@@ -69,10 +77,17 @@ function ProjectTile({ project, onClick, selectMode, selected, mousePos }) {
       onMouseLeave={() => setHovered(false)}
       style={{ transform }}
     >
-      {selectMode && (
+      {selectMode ? (
         <div className={`tile-checkbox${selected ? ' checked' : ''}`}>
           {selected && <span>✓</span>}
         </div>
+      ) : (
+        <button
+          className={`tile-star${project.starred ? ' starred' : ''}`}
+          onClick={(e) => { e.stopPropagation(); onStarToggle(); }}
+        >
+          <img src={project.starred ? starFilledSvg : starUnfilledSvg} alt="Star" />
+        </button>
       )}
       <div className="tile-icon">
         <ProjectIcon iconId={project.icon} className="icon-img" />

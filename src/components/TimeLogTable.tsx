@@ -1,12 +1,22 @@
 import { useState } from 'react';
-import { formatTime, formatDate, formatDuration, getDurationSeconds, isActive } from '../utils/timeUtils';
+import { formatTime, formatDate, formatDuration, getDurationSeconds, isActive } from '../utils/TimeUtils';
+import { TimeLog } from '../types';
 import ConfirmDialog from './ConfirmDialog';
 import './TimeLogTable.css';
 
-function TimeLogTable({ logs, onEdit, onDelete, onSort, sortColumn, sortOrder }) {
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+interface Props {
+  logs: TimeLog[];
+  onEdit: (log: TimeLog) => void;
+  onDelete: (index: number) => void;
+  onSort: (column: number) => void;
+  sortColumn: number;
+  sortOrder: 'asc' | 'desc';
+}
 
-  const getSortIcon = (column) => {
+function TimeLogTable({ logs, onEdit, onDelete, onSort, sortColumn, sortOrder }: Props) {
+  const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<number | null>(null);
+
+  const getSortIcon = (column: number) => {
     if (sortColumn !== column) return '⇅';
     return sortOrder === 'asc' ? '↑' : '↓';
   };
@@ -16,21 +26,17 @@ function TimeLogTable({ logs, onEdit, onDelete, onSort, sortColumn, sortOrder })
       <table className="time-log-table">
         <thead>
           <tr>
-            <th onClick={() => onSort(0)} className="sortable">
-              Date {getSortIcon(0)}
-            </th>
+            <th onClick={() => onSort(0)} className="sortable">Date {getSortIcon(0)}</th>
             <th>Start Time</th>
             <th>End Time</th>
-            <th onClick={() => onSort(1)} className="sortable">
-              Duration {getSortIcon(1)}
-            </th>
+            <th onClick={() => onSort(1)} className="sortable">Duration {getSortIcon(1)}</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {logs.length === 0 ? (
             <tr>
-              <td colSpan="5" className="empty-cell">No time logs yet</td>
+              <td colSpan={5} className="empty-cell">No time logs yet</td>
             </tr>
           ) : (
             logs.map((log, index) => {
@@ -44,20 +50,8 @@ function TimeLogTable({ logs, onEdit, onDelete, onSort, sortColumn, sortOrder })
                   <td>{formatDuration(duration)}</td>
                   <td>
                     <div className="actions">
-                      <button
-                        className="btn-edit"
-                        onClick={() => onEdit(log)}
-                        title="Edit"
-                      >
-                        ✎ Edit
-                      </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => setDeleteConfirm(index)}
-                        title="Delete"
-                      >
-                        ✕ Delete
-                      </button>
+                      <button className="btn-edit" onClick={() => onEdit(log)} title="Edit">✎ Edit</button>
+                      <button className="btn-delete" onClick={() => setDeleteConfirmIndex(index)} title="Delete">✕ Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -67,14 +61,14 @@ function TimeLogTable({ logs, onEdit, onDelete, onSort, sortColumn, sortOrder })
         </tbody>
       </table>
 
-      {deleteConfirm !== null && (
+      {deleteConfirmIndex !== null && (
         <ConfirmDialog
           message="Delete this entry?"
           onConfirm={() => {
-            onDelete(deleteConfirm);
-            setDeleteConfirm(null);
+            onDelete(deleteConfirmIndex);
+            setDeleteConfirmIndex(null);
           }}
-          onCancel={() => setDeleteConfirm(null)}
+          onCancel={() => setDeleteConfirmIndex(null)}
         />
       )}
     </div>
