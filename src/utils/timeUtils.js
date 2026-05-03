@@ -1,15 +1,11 @@
 export const formatDuration = (seconds) => {
   if (!seconds) return '0s';
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  const rounded = Math.round(seconds / 60) * 60;
-  const hours = Math.floor(rounded / 3600);
-  const minutes = Math.floor((rounded % 3600) / 60);
-  if (hours === 0) {
-    return `${minutes}m`;
-  }
-  return `${hours}h ${minutes}m`;
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}h ${m}m ${s}s`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
 };
 
 export const formatTime = (date) => {
@@ -23,8 +19,9 @@ export const formatDate = (date) => {
 };
 
 export const getDurationSeconds = (startTime, endTime) => {
-  if (!startTime || !endTime) return 0;
-  let diff = (endTime - startTime) / 1000;
+  if (!startTime) return 0;
+  const end = endTime || new Date();
+  let diff = (end - startTime) / 1000;
   if (diff < 0) diff += 86400; // crosses midnight
   return Math.floor(diff);
 };

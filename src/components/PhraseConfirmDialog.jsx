@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Storage } from '../utils/Storage';
+import { LocalStorage } from '../utils/LocalStorage.js';
 import './ConfirmDialog.css';
 import './PhraseConfirmDialog.css';
 
 function PhraseConfirmDialog({ count, onConfirm, onCancel }) {
   const [input, setInput] = useState('');
-  const phrase = Storage.getDeletePhrase();
+  const phrase = LocalStorage.getDeletePhrase();
   const matches = input === phrase;
 
   return (

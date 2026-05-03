@@ -78,7 +78,7 @@
   justify-content: center;
   align-items: center;
   gap: 40px;
-  padding: 72px 32px;
+  padding: 36px 32px;
   background-color: var(--bg);
   border-bottom: 1px solid var(--border);
 }
@@ -138,7 +138,7 @@
   padding: 16px 0;
   border-top: 1px solid var(--border);
   margin-top: 16px;
-  text-align: right;
+  text-align: center;
   color: var(--text);
   font-size: 27px;
   font-weight: 600;

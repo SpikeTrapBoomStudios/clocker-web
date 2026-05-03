@@ -1,19 +1,23 @@
 .project-tile {
+  height: 230px;
   background-color: var(--bg-card);
   border: 2px solid var(--border);
   border-radius: 12px;
-  padding: 20.8px;
+  padding: 20px;
   position: relative;
   cursor: pointer;
-  transition: all 0.2s;
   display: flex;
   flex-direction: column;
   transform-style: preserve-3d;
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  image-rendering: auto;
-  height: 248px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.project-tile:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .project-tile.selected {
@@ -44,17 +48,12 @@
   color: #0f0f0f;
 }
 
-.project-tile:hover {
-  border-color: var(--primary);
-  box-shadow: 0 6px 20px rgba(245, 240, 232, 0.15);
-}
-
 .tile-icon {
-  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 52px;
+  margin-bottom: 12px;
 }
 
 .tile-icon .icon-img {
@@ -68,32 +67,33 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding-bottom: 4px;
+  gap: 6px;
 }
 
 .tile-content h3 {
-  margin: 0 0 8px 0;
-  font-size: 24px;
+  margin: 0;
+  font-size: 18px;
   font-weight: 600;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile-content p {
+  margin: 0;
+  color: var(--text-light);
+  font-size: 14px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .tile-content p.no-description {
   font-style: italic;
   opacity: 0.35;
-}
-
-.tile-content p {
-  margin: 0 0 12px 0;
-  padding-bottom: 3px;
-  color: var(--text-light);
-  font-size: 19.5px;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex-shrink: 0;
 }
 
 .tile-footer {
@@ -105,18 +105,20 @@
 }
 
 .tile-time {
-  font-size: 21px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text);
+  white-space: nowrap;
 }
 
 .tile-badge {
   background-color: rgba(16, 185, 129, 0.2);
   color: var(--success);
-  font-size: 16.5px;
+  font-size: 13px;
   font-weight: 600;
-  padding: 4px 8px;
+  padding: 3px 7px;
   border-radius: 6px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }

@@ -24,14 +24,14 @@ function EditLogDialog({ log, onClose, onSubmit }) {
     if (!date || !startTime) return;
 
     const [year, month, day] = date.split('-');
-    const [startHour, startMin] = startTime.split(':');
+    const [startHour, startMinute] = startTime.split(':');
     const newDate = new Date(year, month - 1, day);
 
-    const newStartTime = new Date(year, month - 1, day, startHour, startMin);
+    const newStartTime = new Date(year, month - 1, day, startHour, startMinute);
     const newEndTime = endTime
       ? (() => {
-          const [endHour, endMin] = endTime.split(':');
-          let endDate = new Date(year, month - 1, day, endHour, endMin);
+          const [endHour, endMinute] = endTime.split(':');
+          let endDate = new Date(year, month - 1, day, endHour, endMinute);
           if (endDate < newStartTime) {
             endDate.setDate(endDate.getDate() + 1);
           }

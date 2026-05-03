@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Storage } from '../utils/Storage';
+import { LocalStorage } from '../utils/LocalStorage.js';
 import { formatDuration, formatTime, formatDate, getDurationSeconds, isActive } from '../utils/timeUtils';
 import TimeLogTable from '../components/TimeLogTable';
 import EditLogDialog from '../components/EditLogDialog';
@@ -18,11 +18,11 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
   const [editingLog, setEditingLog] = useState(null);
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [sortCol, setSortCol] = useState(0);
+  const [sortColumn, setSortColumn] = useState(0);
   const [sortOrder, setSortOrder] = useState('desc');
 
   useEffect(() => {
-    const loaded = Storage.loadLogs(project.id);
+    const loaded = LocalStorage.loadLogs(project.id);
     setLogs(loaded);
     syncClockState(loaded);
   }, [project.id]);
@@ -72,7 +72,7 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
     }
 
     setLogs(newLogs);
-    Storage.saveLogs(project.id, newLogs);
+    LocalStorage.saveLogs(project.id, newLogs);
   };
 
   const handleAddEntry = () => {
@@ -88,7 +88,7 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
   const handleDeleteRow = (index) => {
     const newLogs = logs.filter((_, i) => i !== index);
     setLogs(newLogs);
-    Storage.saveLogs(project.id, newLogs);
+    LocalStorage.saveLogs(project.id, newLogs);
   };
 
   const handleEditDialogClose = () => {
@@ -105,7 +105,7 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
     } else {
       setLogs([...logs, log]);
     }
-    Storage.saveLogs(project.id, logs);
+    LocalStorage.saveLogs(project.id, logs);
     handleEditDialogClose();
   };
 
@@ -125,18 +125,18 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${project.name}-timelogs.csv`;
-    a.click();
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = `${project.name}-timelogs.csv`;
+    downloadLink.click();
     URL.revokeObjectURL(url);
   };
 
-  const handleSort = (col) => {
-    if (sortCol === col) {
+  const handleSort = (column) => {
+    if (sortColumn === column) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
-      setSortCol(col);
+      setSortColumn(column);
       setSortOrder('desc');
     }
   };
@@ -147,20 +147,20 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
 
   const getSortedLogs = () => {
     const sorted = [...logs];
-    sorted.sort((a, b) => {
-      let aVal, bVal;
-      if (sortCol === 0) { // Date
-        aVal = a.date;
-        bVal = b.date;
-      } else if (sortCol === 1) { // Duration
-        aVal = getDurationSeconds(a.startTime, a.endTime);
-        bVal = getDurationSeconds(b.startTime, b.endTime);
+    sorted.sort((firstLog, secondLog) => {
+      let firstValue, secondValue;
+      if (sortColumn === 0) { // Date
+        firstValue = firstLog.date;
+        secondValue = secondLog.date;
+      } else if (sortColumn === 1) { // Duration
+        firstValue = getDurationSeconds(firstLog.startTime, firstLog.endTime);
+        secondValue = getDurationSeconds(secondLog.startTime, secondLog.endTime);
       }
 
       if (sortOrder === 'asc') {
-        return aVal > bVal ? 1 : -1;
+        return firstValue > secondValue ? 1 : -1;
       } else {
-        return aVal < bVal ? 1 : -1;
+        return firstValue < secondValue ? 1 : -1;
       }
     });
     return sorted;
@@ -213,7 +213,7 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete }) {
           onEdit={handleEditRow}
           onDelete={handleDeleteRow}
           onSort={handleSort}
-          sortCol={sortCol}
+          sortColumn={sortColumn}
           sortOrder={sortOrder}
         />
 

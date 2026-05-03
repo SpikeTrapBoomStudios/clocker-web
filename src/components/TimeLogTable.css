@@ -14,18 +14,21 @@
 
 .time-log-table thead {
   background-color: var(--bg);
-  position: sticky;
-  top: 0;
 }
 
 .time-log-table th {
+  position: sticky;
+  top: 0;
   padding: 12px;
   text-align: left;
   font-weight: 600;
-  color: var(--text);
-  border-bottom: 1px solid var(--border);
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-light);
+  border-bottom: 2px solid var(--border);
   border-right: 1px solid var(--border);
-  background-color: var(--bg);
+  background-color: var(--bg-light);
 }
 
 .time-log-table th:last-child {

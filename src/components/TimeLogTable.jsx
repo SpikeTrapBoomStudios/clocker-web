@@ -3,11 +3,11 @@ import { formatTime, formatDate, formatDuration, getDurationSeconds, isActive } 
 import ConfirmDialog from './ConfirmDialog';
 import './TimeLogTable.css';
 
-function TimeLogTable({ logs, onEdit, onDelete, onSort, sortCol, sortOrder }) {
+function TimeLogTable({ logs, onEdit, onDelete, onSort, sortColumn, sortOrder }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const getSortIcon = (col) => {
-    if (sortCol !== col) return '⇅';
+  const getSortIcon = (column) => {
+    if (sortColumn !== column) return '⇅';
     return sortOrder === 'asc' ? '↑' : '↓';
   };
 
@@ -33,11 +33,11 @@ function TimeLogTable({ logs, onEdit, onDelete, onSort, sortCol, sortOrder }) {
               <td colSpan="5" className="empty-cell">No time logs yet</td>
             </tr>
           ) : (
-            logs.map((log, idx) => {
+            logs.map((log, index) => {
               const duration = getDurationSeconds(log.startTime, log.endTime);
               const active = isActive(log);
               return (
-                <tr key={idx} className={active ? 'active-row' : ''}>
+                <tr key={index} className={active ? 'active-row' : ''}>
                   <td>{formatDate(log.date)}</td>
                   <td>{formatTime(log.startTime)}</td>
                   <td>{active ? '(Active)' : formatTime(log.endTime)}</td>
@@ -53,7 +53,7 @@ function TimeLogTable({ logs, onEdit, onDelete, onSort, sortCol, sortOrder }) {
                       </button>
                       <button
                         className="btn-delete"
-                        onClick={() => setDeleteConfirm(idx)}
+                        onClick={() => setDeleteConfirm(index)}
                         title="Delete"
                       >
                         ✕ Delete

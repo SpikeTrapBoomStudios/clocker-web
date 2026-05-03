@@ -20,8 +20,8 @@ const NAME_SECOND = [
   'Dungeon', 'Simulator', 'Shooter', 'Puzzle', 'Quest',
 ];
 
-const ML = {
-  lang:     ['C#', 'Java', 'Python', 'TypeScript', 'Go', 'Rust', 'Kotlin', 'Swift', 'PHP', 'Ruby', 'Node.js', 'React', 'Vue', 'Unity', 'Unreal', 'Godot', 'OpenGL', 'WebGL'],
+const SUGGESTION_LIBRARY = {
+  language: ['C#', 'Java', 'Python', 'TypeScript', 'Go', 'Rust', 'Kotlin', 'Swift', 'PHP', 'Ruby', 'Node.js', 'React', 'Vue', 'Unity', 'Unreal', 'Godot', 'OpenGL', 'WebGL'],
   type:     ['API', 'CLI', 'dashboard', 'microservice', 'library', 'plugin', 'web app', 'mobile app', 'bot', 'service', 'game', 'engine', 'mod', 'level editor'],
   task:     ['invoicing', 'scheduling', 'reporting', 'onboarding', 'authentication', 'deployment', 'monitoring', 'billing', 'inventory', 'payroll', 'compliance', 'data sync', 'file uploads', 'notifications', 'pathfinding', 'collision detection', 'procedural generation', 'save states', 'shader rendering', 'AI behaviour'],
   task2:    ['reporting', 'user management', 'access control', 'audit logging', 'rate limiting', 'caching', 'search', 'exports', 'leaderboards', 'physics simulation', 'animation blending', 'particle effects'],
@@ -29,20 +29,20 @@ const ML = {
   deadline: ['Q4', 'the next sprint', 'the audit', 'the launch', 'the migration', 'go-live', 'the demo', 'the game jam'],
   industry: ['healthcare', 'fintech', 'e-commerce', 'logistics', 'SaaS', 'retail', 'enterprise', 'indie gaming', 'mobile gaming'],
   legacy:   ['aging', 'spaghetti', 'unmaintained', 'brittle', 'legacy', 'monolithic', 'undocumented'],
-  adj:      ['lightweight', 'scalable', 'internal', 'client-facing', 'automated', 'real-time', 'self-hosted', '2D', '3D', 'top-down', 'side-scrolling', 'isometric', 'multiplayer'],
+  adjective: ['lightweight', 'scalable', 'internal', 'client-facing', 'automated', 'real-time', 'self-hosted', '2D', '3D', 'top-down', 'side-scrolling', 'isometric', 'multiplayer'],
 };
 
 const DESC_TEMPLATES = [
-  () => `A ${pick(ML.lang)} ${pick(ML.type)} for managing ${pick(ML.task)} across ${pick(ML.team)}.`,
-  () => `${pick(ML.adj)} ${pick(ML.type)} for ${pick(ML.team)} to handle ${pick(ML.task)} and ${pick(ML.task2)}.`,
-  () => `Internal ${pick(ML.lang)}/${pick(ML.lang)} service for ${pick(ML.task)} and ${pick(ML.task2)}.`,
-  () => `Refactoring the ${pick(ML.legacy)} ${pick(ML.type)} before ${pick(ML.deadline)}.`,
-  () => `Client-facing ${pick(ML.lang)} ${pick(ML.type)} for ${pick(ML.industry)} ${pick(ML.task)}.`,
-  () => `Migrating ${pick(ML.task)} from ${pick(ML.lang)} to ${pick(ML.lang)}.`,
-  () => `${pick(ML.task)} automation for ${pick(ML.team)}.`,
-  () => `${pick(ML.adj)} ${pick(ML.lang)} ${pick(ML.type)} for ${pick(ML.task)} tracking.`,
-  () => `Rebuilding ${pick(ML.task)} before ${pick(ML.deadline)}. ${pick(ML.lang)} this time.`,
-  () => `${pick(ML.lang)} ${pick(ML.type)} handling ${pick(ML.task)} and ${pick(ML.task2)} for ${pick(ML.industry)}.`,
+  () => `A ${pick(SUGGESTION_LIBRARY.language)} ${pick(SUGGESTION_LIBRARY.type)} for managing ${pick(SUGGESTION_LIBRARY.task)} across ${pick(SUGGESTION_LIBRARY.team)}.`,
+  () => `${pick(SUGGESTION_LIBRARY.adjective)} ${pick(SUGGESTION_LIBRARY.type)} for ${pick(SUGGESTION_LIBRARY.team)} to handle ${pick(SUGGESTION_LIBRARY.task)} and ${pick(SUGGESTION_LIBRARY.task2)}.`,
+  () => `Internal ${pick(SUGGESTION_LIBRARY.language)}/${pick(SUGGESTION_LIBRARY.language)} service for ${pick(SUGGESTION_LIBRARY.task)} and ${pick(SUGGESTION_LIBRARY.task2)}.`,
+  () => `Refactoring the ${pick(SUGGESTION_LIBRARY.legacy)} ${pick(SUGGESTION_LIBRARY.type)} before ${pick(SUGGESTION_LIBRARY.deadline)}.`,
+  () => `Client-facing ${pick(SUGGESTION_LIBRARY.language)} ${pick(SUGGESTION_LIBRARY.type)} for ${pick(SUGGESTION_LIBRARY.industry)} ${pick(SUGGESTION_LIBRARY.task)}.`,
+  () => `Migrating ${pick(SUGGESTION_LIBRARY.task)} from ${pick(SUGGESTION_LIBRARY.language)} to ${pick(SUGGESTION_LIBRARY.language)}.`,
+  () => `${pick(SUGGESTION_LIBRARY.task)} automation for ${pick(SUGGESTION_LIBRARY.team)}.`,
+  () => `${pick(SUGGESTION_LIBRARY.adjective)} ${pick(SUGGESTION_LIBRARY.language)} ${pick(SUGGESTION_LIBRARY.type)} for ${pick(SUGGESTION_LIBRARY.task)} tracking.`,
+  () => `Rebuilding ${pick(SUGGESTION_LIBRARY.task)} before ${pick(SUGGESTION_LIBRARY.deadline)}. ${pick(SUGGESTION_LIBRARY.language)} this time.`,
+  () => `${pick(SUGGESTION_LIBRARY.language)} ${pick(SUGGESTION_LIBRARY.type)} handling ${pick(SUGGESTION_LIBRARY.task)} and ${pick(SUGGESTION_LIBRARY.task2)} for ${pick(SUGGESTION_LIBRARY.industry)}.`,
 ];
 
 function pick(arr) {
@@ -53,13 +53,13 @@ function luckyName() {
   return `${pick(NAME_FIRST)} ${pick(NAME_SECOND)}`;
 }
 
-function luckyDesc() {
+function luckyDescription() {
   const result = pick(DESC_TEMPLATES)();
   return result.charAt(0).toUpperCase() + result.slice(1);
 }
 
-const NAME_MAX = 67;
-const DESC_MAX = 135;
+const NAME_MAX = 44;
+const DESCRIPTION_MAX = 95;
 
 function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
   const [name, setName] = useState(project?.name || '');
@@ -67,26 +67,24 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
   const [icon, setIcon] = useState(project?.icon || 'clock');
   const [nameError, setNameError] = useState('');
   const [spinning, setSpinning] = useState(false);
-  const [userTyped, setUserTyped] = useState(false);
   const spinRef = useRef(null);
 
-  const isDuplicate = (val) =>
-    projects.some(p => p.name.trim().toLowerCase() === val.trim().toLowerCase() && p.id !== project?.id);
+  const isDuplicate = (projectName) =>
+    projects.some(existingProject => existingProject.name.trim().toLowerCase() === projectName.trim().toLowerCase() && existingProject.id !== project?.id);
 
-  const handleNameChange = (val) => {
-    setName(val);
-    setUserTyped(true);
-    setNameError(isDuplicate(val) ? 'A project with this name already exists.' : '');
+  const handleNameChange = (projectName) => {
+    setName(projectName);
+    setNameError(isDuplicate(projectName) ? 'A project with this name already exists.' : '');
   };
 
-  const nameOver = name.length - NAME_MAX;
-  const descOver = description.length - DESC_MAX;
+  const nameCharsOver = name.length - NAME_MAX;
+  const descriptionCharsOver = description.length - DESCRIPTION_MAX;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) return;
     if (isDuplicate(name)) { setNameError('A project with this name already exists.'); return; }
-    if (nameOver > 0 || descOver > 0) return;
+    if (nameCharsOver > 0 || descriptionCharsOver > 0) return;
     onSubmit({ id: project?.id, name, description, icon });
   };
 
@@ -96,7 +94,7 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
     let finalName = luckyName();
     let attempts = 0;
     while (isDuplicate(finalName) && attempts < 20) { finalName = luckyName(); attempts++; }
-    const finalDesc = luckyDesc();
+    const finalDescription = luckyDescription();
     const finalIcon = pick(ICON_IDS);
 
     const duration = 1000 + Math.random() * 1000;
@@ -114,7 +112,7 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
       const interval = 60 + progress * 160;
 
       setName(luckyName());
-      setDescription(luckyDesc());
+      setDescription(luckyDescription());
       setIcon(pick(ICON_IDS));
 
       if (progress < 1) {
@@ -124,7 +122,7 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
         spinRef.current = setTimeout(() => spin(performance.now()), 220);
       } else {
         setName(finalName);
-        setDescription(finalDesc);
+        setDescription(finalDescription);
         setIcon(finalIcon);
         setSpinning(false);
       }
@@ -141,8 +139,8 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
           <div className="form-group">
             <div className="field-label-row">
               <label>Name</label>
-              <span className={`char-counter ${nameOver > 0 ? 'over' : nameOver > -10 ? 'near' : ''}`}>
-                {nameOver > 0 ? `-${nameOver}` : NAME_MAX - name.length}
+              <span className={`char-counter ${nameCharsOver > 0 ? 'over' : nameCharsOver > -10 ? 'near' : ''}`}>
+                {nameCharsOver > 0 ? `-${nameCharsOver}` : NAME_MAX - name.length}
               </span>
             </div>
             <input
@@ -151,7 +149,7 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
               onChange={(e) => handleNameChange(e.target.value)}
               placeholder="Project name"
               autoFocus
-              className={nameOver > 0 || nameError ? 'input-over' : ''}
+              className={nameCharsOver > 0 || nameError ? 'input-over' : ''}
             />
             {nameError && <p className="field-error">{nameError}</p>}
           </div>
@@ -159,16 +157,16 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
           <div className="form-group">
             <div className="field-label-row">
               <label>Description</label>
-              <span className={`char-counter ${descOver > 0 ? 'over' : descOver > -10 ? 'near' : ''}`}>
-                {descOver > 0 ? `-${descOver}` : DESC_MAX - description.length}
+              <span className={`char-counter ${descriptionCharsOver > 0 ? 'over' : descriptionCharsOver > -10 ? 'near' : ''}`}>
+                {descriptionCharsOver > 0 ? `-${descriptionCharsOver}` : DESCRIPTION_MAX - description.length}
               </span>
             </div>
             <input
               type="text"
               value={description}
-              onChange={(e) => { setDescription(e.target.value); setUserTyped(true); }}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional description"
-              className={descOver > 0 ? 'input-over' : ''}
+              className={descriptionCharsOver > 0 ? 'input-over' : ''}
             />
           </div>
 
@@ -179,7 +177,7 @@ function NewProjectDialog({ project, projects = [], onClose, onSubmit }) {
 
           <div className="dialog-buttons">
             <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
-            <button type="submit" className="btn-primary" disabled={!!nameError || !name.trim() || spinning || nameOver > 0 || descOver > 0}>{project ? 'Save' : 'Create'}</button>
+            <button type="submit" className="btn-primary" disabled={!!nameError || !name.trim() || spinning || nameCharsOver > 0 || descriptionCharsOver > 0}>{project ? 'Save' : 'Create'}</button>
           </div>
 
           {!project && !name && !description && (

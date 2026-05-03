@@ -1,82 +1,85 @@
 import { useState } from 'react';
-import { Storage } from '../utils/Storage';
+import { LocalStorage } from '../utils/LocalStorage.js';
 import './SettingsDialog.css';
 
+const hasHover = window.matchMedia('(hover: hover)').matches;
+
 function SettingsDialog({ onClose }) {
-  const [effectStrength, setEffectStrength] = useState(Storage.getEffectStrength());
-  const [invertEffect, setInvertEffect] = useState(Storage.getInvertEffect());
-  const [deletePhrase, setDeletePhrase] = useState(Storage.getDeletePhrase());
+  const [deletePhrase, setDeletePhrase] = useState(LocalStorage.getDeletePhrase());
+  const [orbitStrength, setOrbitStrength] = useState(LocalStorage.getOrbitStrength());
+  const [invertOrbit, setInvertOrbit] = useState(LocalStorage.getInvertOrbit());
 
-  const DEFAULT_STRENGTH = 4.0;
-  const DEFAULT_INVERT = true;
-
-  const handleStrengthChange = (value) => {
-    const numValue = parseFloat(value);
-    setEffectStrength(numValue);
-    Storage.setEffectStrength(numValue);
+  const resetOrbitStrength = () => {
+    const val = LocalStorage.getDefaultOrbitStrength();
+    setOrbitStrength(val);
+    LocalStorage.setOrbitStrength(val);
   };
 
-  const handleInvertChange = (e) => {
-    const inverted = e.target.checked;
-    setInvertEffect(inverted);
-    Storage.setInvertEffect(inverted);
-  };
-
-  const resetStrength = () => {
-    setEffectStrength(DEFAULT_STRENGTH);
-    Storage.setEffectStrength(DEFAULT_STRENGTH);
-  };
-
-  const resetInvert = () => {
-    setInvertEffect(DEFAULT_INVERT);
-    Storage.setInvertEffect(DEFAULT_INVERT);
+  const resetInvertOrbit = () => {
+    const val = LocalStorage.getDefaultInvertOrbit();
+    setInvertOrbit(val);
+    LocalStorage.setInvertOrbit(val);
   };
 
   return (
     <div className="dialog-overlay" onClick={onClose}>
       <div className="dialog" onClick={(e) => e.stopPropagation()}>
-        <h2>Settings</h2>
+        <div className="dialog-header">
+          <h2>Settings</h2>
+          <button className="btn-close" onClick={onClose}>✕</button>
+        </div>
 
-        <div className="setting setting-slider">
-          <h3>Tile Hover Effect Strength</h3>
-          <div className="setting-widget">
+        <div className={`setting setting-slider${!hasHover ? ' setting-disabled' : ''}`}>
+          <div className="setting-title-row">
+            <h3>Tile Orbit Strength</h3>
+            <button className="btn-reset" onClick={resetOrbitStrength} title="Reset to default">↻</button>
+          </div>
+          <div className="setting-controls">
             <input
               type="range"
+              className="strength-slider"
               min="0"
               max="10"
               step="0.5"
-              value={effectStrength}
-              onChange={(e) => handleStrengthChange(e.target.value)}
-              className="strength-slider"
+              value={orbitStrength}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                setOrbitStrength(val);
+                LocalStorage.setOrbitStrength(val);
+              }}
             />
-            <span className="strength-value">{effectStrength.toFixed(1)}°</span>
-            <button className="btn-reset" onClick={resetStrength} title="Reset to default">↻</button>
+            <span className="strength-value">{orbitStrength.toFixed(1)}</span>
           </div>
         </div>
 
-        <div className="setting setting-checkbox">
-          <h3>Invert Tile Hover Effect</h3>
-          <div className="setting-controls">
+        <div className={`setting setting-checkbox${!hasHover ? ' setting-disabled' : ''}`}>
+          <div className="setting-content">
+            <h3>Invert Orbit Direction</h3>
+          </div>
+          <div className="setting-widget">
+            <button className="btn-reset" onClick={resetInvertOrbit} title="Reset to default">↻</button>
             <input
               type="checkbox"
-              checked={invertEffect}
-              onChange={handleInvertChange}
               className="checkbox-input"
+              checked={invertOrbit}
+              onChange={(e) => {
+                setInvertOrbit(e.target.checked);
+                LocalStorage.setInvertOrbit(e.target.checked);
+              }}
             />
-            <button className="btn-reset" onClick={resetInvert} title="Reset to default">↻</button>
           </div>
         </div>
 
-        <div className="setting setting-slider">
+        <div className="setting setting-slider setting-text-entry">
           <div className="setting-title-row">
             <h3>Bulk Delete Confirmation Phrase</h3>
-            <button className="btn-reset" onClick={() => { setDeletePhrase(Storage.getDefaultDeletePhrase()); Storage.setDeletePhrase(Storage.getDefaultDeletePhrase()); }} title="Reset to default">↻</button>
+            <button className="btn-reset" onClick={() => { setDeletePhrase(LocalStorage.getDefaultDeletePhrase()); LocalStorage.setDeletePhrase(LocalStorage.getDefaultDeletePhrase()); }} title="Reset to default">↻</button>
           </div>
           <input
             type="text"
             value={deletePhrase}
-            onChange={(e) => { setDeletePhrase(e.target.value); Storage.setDeletePhrase(e.target.value); }}
-            style={{ width: '100%', marginTop: '8px' }}
+            onChange={(e) => { setDeletePhrase(e.target.value); LocalStorage.setDeletePhrase(e.target.value); }}
+            style={{ width: '100%', marginTop: '8px', fontSize: '1.0em' }}
           />
         </div>
 
