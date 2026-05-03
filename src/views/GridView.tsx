@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useLayoutEffect } from 'react';
 import type { User } from 'firebase/auth';
 import accountCircleIcon from '../assets/account_circle.svg';
 import ProjectTile from '../components/ProjectTile';
@@ -43,6 +43,8 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProjects, o
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const [sortMethod, setSortMethod] = useState(() => LocalStorage.getSortMethod());
   const hasHover = useRef(window.matchMedia('(hover: hover)').matches);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const prevPositions = useRef<Map<string, DOMRect>>(new Map());
 
   const projectStats = useMemo(() => {
     return projects.map(project => {
@@ -78,6 +80,35 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProjects, o
     const unstarred = projects.filter(p => !p.starred).sort(comparator);
     return [...starred, ...unstarred];
   }, [projects, projectStats, sortMethod]);
+
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const wrappers = grid.querySelectorAll<HTMLElement>('[data-project-id]');
+    const newPositions = new Map<string, DOMRect>();
+
+    wrappers.forEach(el => {
+      newPositions.set(el.dataset.projectId!, el.getBoundingClientRect());
+    });
+
+    wrappers.forEach(el => {
+      const id = el.dataset.projectId!;
+      const prev = prevPositions.current.get(id);
+      const curr = newPositions.get(id)!;
+      if (prev && (Math.abs(prev.left - curr.left) > 0.5 || Math.abs(prev.top - curr.top) > 0.5)) {
+        el.animate(
+          [
+            { transform: `translate(${prev.left - curr.left}px, ${prev.top - curr.top}px)` },
+            { transform: 'translate(0px, 0px)' },
+          ],
+          { duration: 280, easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)', fill: 'none' }
+        );
+      }
+    });
+
+    prevPositions.current = newPositions;
+  }, [sortedProjects]);
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSortMethod(e.target.value);
@@ -161,22 +192,23 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProjects, o
                 <button className="btn-primary" onClick={() => setShowDialog(true)}>+ New Project</button>
               </div>
             </div>
-            <div className="projects-grid">
+            <div className="projects-grid" ref={gridRef}>
               {sortedProjects.length === 0 ? (
                 <div className="empty-state">
                   <p>No projects yet. Create one to get started!</p>
                 </div>
               ) : (
                 sortedProjects.map(project => (
-                  <ProjectTile
-                    key={project.id}
-                    project={project}
-                    onClick={() => handleTileClick(project)}
-                    selectMode={selectMode}
-                    selected={selectedIds.has(project.id)}
-                    mousePos={mousePos}
-                    onStarToggle={() => onStarProject(project.id)}
-                  />
+                  <div key={project.id} data-project-id={project.id}>
+                    <ProjectTile
+                      project={project}
+                      onClick={() => handleTileClick(project)}
+                      selectMode={selectMode}
+                      selected={selectedIds.has(project.id)}
+                      mousePos={mousePos}
+                      onStarToggle={() => onStarProject(project.id)}
+                    />
+                  </div>
                 ))
               )}
             </div>
