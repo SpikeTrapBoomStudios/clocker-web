@@ -27,11 +27,11 @@ const ICONS: { id: IconId; label: string; svg: string }[] = [
   { id: 'terminal',   label: 'Terminal',  svg: terminalSvg },
   { id: 'graduation', label: 'Learning',  svg: graduationCapSvg },
   { id: 'pencil',     label: 'Pencil',    svg: pencilSvg },
+  { id: 'swimming',   label: 'Swimming',  svg: swimmingSvg },
   { id: 'backpack',   label: 'Backpack',  svg: backpackSvg },
   { id: 'book',       label: 'Book',      svg: bookSvg },
   { id: 'exercise',   label: 'Exercise',  svg: exerciseSvg },
   { id: 'money',      label: 'Money',     svg: moneySvg },
-  { id: 'swimming',   label: 'Swimming',  svg: swimmingSvg },
 ];
 
 interface Props {
