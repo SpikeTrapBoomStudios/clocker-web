@@ -1,0 +1,21 @@
+.activity-calendar {
+  padding: 8px 0 0;
+}
+
+.activity-tooltip {
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.activity-tooltip-date {
+  color: var(--text-light);
+  margin-bottom: 2px;
+}
+
+.activity-tooltip-time {
+  color: var(--text);
+  font-weight: 500;
+}

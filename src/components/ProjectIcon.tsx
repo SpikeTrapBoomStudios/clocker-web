@@ -8,6 +8,11 @@ import bookmarkSvg from '../assets/bookmark.svg';
 import terminalSvg from '../assets/terminal.svg';
 import graduationCapSvg from '../assets/graduation_cap.svg';
 import pencilSvg from '../assets/pencil.svg';
+import backpackSvg from '../assets/backpack.svg';
+import bookSvg from '../assets/book.svg';
+import exerciseSvg from '../assets/exercise.svg';
+import moneySvg from '../assets/money.svg';
+import swimmingSvg from '../assets/swimming.svg';
 import { IconId } from '../types';
 
 const ICON_MAP: Record<IconId, string> = {
@@ -21,6 +26,11 @@ const ICON_MAP: Record<IconId, string> = {
   terminal:   terminalSvg,
   graduation: graduationCapSvg,
   pencil:     pencilSvg,
+  backpack:   backpackSvg,
+  book:       bookSvg,
+  exercise:   exerciseSvg,
+  money:      moneySvg,
+  swimming:   swimmingSvg,
 };
 
 interface Props {

@@ -30,6 +30,7 @@
   font-family: 'CantarellTitle', sans-serif;
 }
 
+
 .header-controls {
   display: flex;
   gap: 12px;
@@ -48,6 +49,9 @@
 }
 
 .projects-section {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
   width: 100%;
 }
 
@@ -159,6 +163,26 @@
 
 .btn-delete-selected {
   font-size: 15px;
+}
+
+.analytics-graphs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.analytics-graph-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px 24px;
+}
+
+.analytics-graph-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-light);
 }
 
 .btn-settings {

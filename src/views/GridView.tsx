@@ -9,6 +9,7 @@ import SignInDialog from '../components/SignInDialog';
 import { LocalStorage } from '../utils/LocalStorage';
 import { getDurationSeconds, isActive } from '../utils/TimeUtils';
 import { Project, ProjectFormData } from '../types';
+import ActivityCalendar from '../components/ActivityCalendar';
 import './GridView.css';
 
 const SORT_OPTIONS = [
@@ -211,6 +212,19 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProjects, o
                   </div>
                 ))
               )}
+            </div>
+          </div>
+          <div className="projects-container">
+            <div className="projects-header">
+              <div className="projects-header-left">
+                <h2 className="projects-title">Analytics</h2>
+              </div>
+            </div>
+            <div className="analytics-graphs">
+              <div className="analytics-graph-card">
+                <h3 className="analytics-graph-title">Daily Activity</h3>
+                <ActivityCalendar projects={projects} />
+              </div>
             </div>
           </div>
         </div>
