@@ -93,8 +93,8 @@ const ActivityCalendar = memo(function ActivityCalendar({ projects }: Props) {
             tickLine={false}
             axisLine={false}
             tickFormatter={scale.format}
-            label={{ value: scale.label, angle: -90, position: 'insideLeft', offset: 4, fill: 'var(--text-light)', fontSize: 13 }}
-            width={40}
+            label={{ value: scale.label, angle: -90, position: 'insideLeft', dx: -12, fill: 'var(--text-light)', fontSize: 13 }}
+            width={56}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--border)' }} />
           <Line
