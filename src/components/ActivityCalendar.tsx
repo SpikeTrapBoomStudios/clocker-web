@@ -68,9 +68,15 @@ const ActivityCalendar = memo(function ActivityCalendar({ projects }: Props) {
 
   const weekStartIndices = useMemo(() => {
     const indices = new Set<number>();
+    let firstSundayIndex = -1;
     for (let i = 0; i < data.length; i++) {
-      if (i === 0 || new Date(data[i].date).getDay() === 0) indices.add(i);
+      if (new Date(data[i].date).getDay() === 0) {
+        if (firstSundayIndex === -1) firstSundayIndex = i;
+        indices.add(i);
+      }
     }
+    // Only show the first-point label when the first Sunday is far enough away to avoid overlap
+    if (firstSundayIndex < 0 || firstSundayIndex > 4) indices.add(0);
     return indices;
   }, [data]);
 
