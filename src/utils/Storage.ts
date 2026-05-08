@@ -44,4 +44,9 @@ export const Storage = {
       await CloudStorage.saveLogs(auth.currentUser.uid, projectId, logs);
     }
   },
+
+  async syncAllLogs(projectIds: string[]): Promise<void> {
+    if (!auth.currentUser) return;
+    await Promise.all(projectIds.map(projectId => this.loadLogs(projectId)));
+  },
 };

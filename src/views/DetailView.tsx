@@ -5,9 +5,10 @@ import TimeLogTable from '../components/TimeLogTable';
 import EditLogDialog from '../components/EditLogDialog';
 import NewProjectDialog from '../components/NewProjectDialog';
 import ConfirmDialog from '../components/ConfirmDialog';
+import CreateTagDialog from '../components/CreateTagDialog';
 import ProjectIcon from '../components/ProjectIcon';
 import arrowBackIcon from '../assets/arrow_back.svg';
-import { Project, ProjectFormData, TimeLog } from '../types';
+import { Project, ProjectFormData, Tag, TAG_COLORS, TimeLog } from '../types';
 import './DetailView.css';
 
 interface Props {
@@ -17,9 +18,10 @@ interface Props {
   onEdit: (data: ProjectFormData) => void;
   onDelete: (projectId: string) => void;
   onActiveChange: (active: boolean) => void;
+  onTagsChange: (projectId: string, tags: Tag[]) => void;
 }
 
-function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActiveChange }: Props) {
+function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActiveChange, onTagsChange }: Props) {
   const [logs, setLogs] = useState<TimeLog[]>([]);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [clockedIn, setClockedIn] = useState(false);
@@ -28,6 +30,8 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActive
   const [editingLog, setEditingLog] = useState<TimeLog | null>(null);
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCreateTagDialog, setShowCreateTagDialog] = useState(false);
+  const [tagTargetLog, setTagTargetLog] = useState<TimeLog | null>(null);
   const [sortColumn, setSortColumn] = useState(0);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
@@ -102,14 +106,64 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActive
     handleEditDialogClose();
   };
 
+  const handleTagChange = (log: TimeLog, tagId: string | null) => {
+    const updatedLogs = logs.map(existingLog =>
+      existingLog === log ? { ...existingLog, tagId: tagId ?? undefined } : existingLog
+    );
+    setLogs(updatedLogs);
+    Storage.saveLogs(project.id, updatedLogs);
+  };
+
+  const handleCreateTagOpen = (log: TimeLog) => {
+    setTagTargetLog(log);
+    setShowCreateTagDialog(true);
+  };
+
+  const handleDeleteTag = (tagId: string) => {
+    const updatedTags = project.tags.filter(tag => tag.id !== tagId);
+    onTagsChange(project.id, updatedTags);
+    const updatedLogs = logs.map(existingLog => existingLog.tagId === tagId ? { ...existingLog, tagId: undefined } : existingLog);
+    setLogs(updatedLogs);
+    Storage.saveLogs(project.id, updatedLogs);
+  };
+
+  const handleEditTag = (tagId: string, tagData: Omit<Tag, 'id'>) => {
+    const updatedTags = project.tags.map(tag => tag.id === tagId ? { ...tag, ...tagData } : tag);
+    onTagsChange(project.id, updatedTags);
+  };
+
+  const handleCreateTagSubmit = (tagData: Omit<Tag, 'id'>) => {
+    const newTag: Tag = {
+      id: `tag_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      ...tagData,
+    };
+    const updatedTags = [...project.tags, newTag];
+    onTagsChange(project.id, updatedTags);
+
+    if (tagTargetLog) {
+      const updatedLogs = logs.map(existingLog =>
+        existingLog === tagTargetLog ? { ...existingLog, tagId: newTag.id } : existingLog
+      );
+      setLogs(updatedLogs);
+      Storage.saveLogs(project.id, updatedLogs);
+    }
+
+    setShowCreateTagDialog(false);
+    setTagTargetLog(null);
+  };
+
   const handleExportCsv = () => {
-    const headers = ['Date', 'Start Time', 'End Time', 'Duration'];
-    const rows = logs.map(log => [
-      formatDate(log.date),
-      formatTime(log.startTime),
-      log.endTime ? formatTime(log.endTime) : '(Active)',
-      formatDuration(getDurationSeconds(log.startTime, log.endTime)),
-    ]);
+    const headers = ['Date', 'Start Time', 'End Time', 'Duration', 'Tag'];
+    const rows = logs.map(log => {
+      const tag = project.tags.find(projectTag => projectTag.id === log.tagId);
+      return [
+        formatDate(log.date),
+        formatTime(log.startTime),
+        log.endTime ? formatTime(log.endTime) : '(Active)',
+        formatDuration(getDurationSeconds(log.startTime, log.endTime)),
+        tag ? tag.name : '',
+      ];
+    });
     const csv = [headers.join(','), ...rows.map(row => row.map(cell => `"${cell}"`).join(','))].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -131,6 +185,19 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActive
 
   const getTotalSeconds = () =>
     logs.reduce((sum, log) => sum + getDurationSeconds(log.startTime, log.endTime), 0);
+
+  const getTagTotals = () => {
+    const totals = new Map<string, number>();
+    logs.forEach(log => {
+      if (log.tagId) {
+        totals.set(log.tagId, (totals.get(log.tagId) ?? 0) + getDurationSeconds(log.startTime, log.endTime));
+      }
+    });
+    return project.tags
+      .filter(tag => totals.has(tag.id))
+      .map(tag => ({ tag, seconds: totals.get(tag.id)! }))
+      .sort((a, b) => b.seconds - a.seconds);
+  };
 
   const getSortedLogs = (): TimeLog[] => {
     return [...logs].sort((firstLog, secondLog) => {
@@ -184,14 +251,33 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActive
         </div>
         <TimeLogTable
           logs={getSortedLogs()}
+          tags={project.tags}
           onEdit={(log) => { setEditingLog(log); setShowEditDialog(true); }}
           onDelete={handleDeleteRow}
           onSort={handleSort}
+          onTagChange={handleTagChange}
+          onCreateTag={handleCreateTagOpen}
+          onDeleteTag={handleDeleteTag}
+          onEditTag={handleEditTag}
           sortColumn={sortColumn}
           sortOrder={sortOrder}
         />
         <div className="total-section">
-          <strong>Total: {formatDuration(getTotalSeconds())}</strong>
+          <strong className="total-label">Total: {formatDuration(getTotalSeconds())}</strong>
+          <div className="tag-totals-scroll">
+            {getTagTotals().map(({ tag, seconds }) => {
+              const color = TAG_COLORS.find(colorEntry => colorEntry.id === tag.color)?.value;
+              return (
+                <div key={tag.id} className="tag-total-card" style={{ borderColor: color }}>
+                  <div className="tag-total-name">
+                    <span className="tag-total-dot" style={{ backgroundColor: color }} />
+                    <span>{tag.name}</span>
+                  </div>
+                  <div className="tag-total-time">{formatDuration(seconds)}</div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -213,6 +299,13 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActive
           message={`Delete "${project.name}"?`}
           onConfirm={() => { onDelete(project.id); setShowDeleteConfirm(false); }}
           onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
+
+      {showCreateTagDialog && (
+        <CreateTagDialog
+          onClose={() => { setShowCreateTagDialog(false); setTagTargetLog(null); }}
+          onSubmit={handleCreateTagSubmit}
         />
       )}
     </div>

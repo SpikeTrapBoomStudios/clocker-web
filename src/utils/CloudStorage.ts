@@ -1,6 +1,6 @@
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ICON_IDS, IconId, Project, TimeLog } from '../types';
+import { ICON_IDS, IconId, Project, Tag, TimeLog } from '../types';
 
 interface FirestoreProject {
   id: string;
@@ -9,12 +9,14 @@ interface FirestoreProject {
   icon: number;
   active: boolean;
   starred: boolean;
+  tags?: Tag[];
 }
 
 interface FirestoreTimeLog {
   date: string;
   startTime: string;
   endTime: string | null;
+  tagId?: string;
 }
 
 function toFirestoreProject(localProject: Project): FirestoreProject {
@@ -25,6 +27,7 @@ function toFirestoreProject(localProject: Project): FirestoreProject {
     icon: Math.max(0, ICON_IDS.indexOf(localProject.icon as IconId)),
     active: localProject.active,
     starred: localProject.starred,
+    tags: localProject.tags,
   };
 }
 
@@ -36,6 +39,7 @@ function fromFirestoreProject(firestoreProject: FirestoreProject): Project {
     icon: ICON_IDS[firestoreProject.icon] ?? 'clock',
     active: firestoreProject.active ?? false,
     starred: firestoreProject.starred ?? false,
+    tags: firestoreProject.tags ?? [],
   };
 }
 
@@ -44,6 +48,7 @@ function toFirestoreLog(log: TimeLog): FirestoreTimeLog {
     date: log.date.toISOString(),
     startTime: log.startTime.toISOString(),
     endTime: log.endTime?.toISOString() ?? null,
+    tagId: log.tagId,
   };
 }
 
@@ -52,6 +57,7 @@ function fromFirestoreLog(firestoreLog: FirestoreTimeLog): TimeLog {
     date: new Date(firestoreLog.date),
     startTime: new Date(firestoreLog.startTime),
     endTime: firestoreLog.endTime ? new Date(firestoreLog.endTime) : null,
+    tagId: firestoreLog.tagId,
   };
 }
 

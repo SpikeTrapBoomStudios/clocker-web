@@ -1,4 +1,4 @@
-import { IconId, Project, TimeLog } from '../types';
+import { IconId, Project, Tag, TimeLog } from '../types';
 import { DEFAULT_DELETE_PHRASE, DEFAULT_INVERT_ORBIT, DEFAULT_ORBIT_STRENGTH, DEFAULT_SORT_METHOD } from './SettingsDefaults';
 
 const PROJECTS_KEY = 'clocker_projects';
@@ -12,6 +12,7 @@ interface SerializedTimeLog {
   date: string;
   startTime: string;
   endTime: string | null;
+  tagId?: string;
 }
 
 interface StoredProject {
@@ -21,6 +22,7 @@ interface StoredProject {
   icon: IconId;
   active?: boolean;
   starred?: boolean;
+  tags?: Tag[];
 }
 
 export const LocalStorage = {
@@ -31,6 +33,7 @@ export const LocalStorage = {
       ...project,
       active: project.active ?? false,
       starred: project.starred ?? false,
+      tags: project.tags ?? [],
     }));
   },
 
@@ -45,6 +48,7 @@ export const LocalStorage = {
       date: new Date(log.date),
       startTime: new Date(log.startTime),
       endTime: log.endTime ? new Date(log.endTime) : null,
+      tagId: log.tagId,
     }));
   },
 

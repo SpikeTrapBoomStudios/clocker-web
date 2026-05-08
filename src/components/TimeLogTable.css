@@ -10,7 +10,13 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 18.9px;
+  table-layout: fixed;
 }
+
+.time-log-table th:nth-child(1) { width: 16%; }
+.time-log-table th:nth-child(2) { width: 13%; }
+.time-log-table th:nth-child(3) { width: 13%; }
+.time-log-table th:nth-child(4) { width: 13%; }
 
 .time-log-table thead {
   background-color: var(--bg);
@@ -78,6 +84,7 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-content: flex-end;
 }
 
 .btn-edit,
@@ -85,14 +92,16 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
+  padding: 7px 10px;
   border-radius: 6px;
   border: 1px solid var(--border);
   background-color: transparent;
   color: var(--text);
   font-size: 19.5px;
+  line-height: normal;
   cursor: pointer;
   white-space: nowrap;
+  margin-right: 0;
 }
 
 .btn-edit:hover {

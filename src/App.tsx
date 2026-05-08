@@ -7,7 +7,7 @@ import { LocalStorage } from './utils/LocalStorage';
 import { Storage } from './utils/Storage';
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { auth, googleProvider, githubProvider } from './firebase';
-import { Project, ProjectFormData } from './types';
+import { Project, ProjectFormData, Tag } from './types';
 
 function App() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
@@ -37,6 +37,7 @@ function App() {
       id: formData.id ?? generateId(formData.name),
       active: false,
       starred: false,
+      tags: [],
     };
 
     const baseId = newProject.id;
@@ -94,6 +95,15 @@ function App() {
     Storage.saveProjects(updatedProjects);
   };
 
+  const handleTagsChange = (projectId: string, tags: Tag[]) => {
+    const updatedProjects = projects.map(project =>
+      project.id === projectId ? { ...project, tags } : project
+    );
+    setProjects(updatedProjects);
+    if (selectedProject?.id === projectId) setSelectedProject(prev => prev ? { ...prev, tags } : prev);
+    Storage.saveProjects(updatedProjects);
+  };
+
   useEffect(() => {
     return onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
@@ -101,6 +111,7 @@ function App() {
         const loadedProjects = await Storage.loadProjects();
         setProjects(loadedProjects);
         LocalStorage.saveProjects(loadedProjects);
+        Storage.syncAllLogs(loadedProjects.map(project => project.id));
       }
     });
   }, []);
@@ -127,6 +138,7 @@ function App() {
           onEdit={handleEditProject}
           onDelete={handleDeleteProject}
           onActiveChange={(active) => handleActiveChange(selectedProject.id, active)}
+          onTagsChange={handleTagsChange}
         />
       )}
     </div>

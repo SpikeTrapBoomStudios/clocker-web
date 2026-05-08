@@ -1,0 +1,28 @@
+.color-selector {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.color-option {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  opacity: 0.7;
+}
+
+.color-option:hover {
+  opacity: 1;
+  transform: scale(1.12);
+}
+
+.color-option.active {
+  opacity: 1;
+  transform: scale(1.12);
+  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--text);
+}

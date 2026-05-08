@@ -1,19 +1,25 @@
 import { useState } from 'react';
 import { formatTime, formatDate, formatDuration, getDurationSeconds, isActive } from '../utils/TimeUtils';
-import { TimeLog } from '../types';
+import { Tag, TimeLog } from '../types';
 import ConfirmDialog from './ConfirmDialog';
+import TagDropdown from './TagDropdown';
 import './TimeLogTable.css';
 
 interface Props {
   logs: TimeLog[];
+  tags: Tag[];
   onEdit: (log: TimeLog) => void;
   onDelete: (index: number) => void;
   onSort: (column: number) => void;
+  onTagChange: (log: TimeLog, tagId: string | null) => void;
+  onCreateTag: (log: TimeLog) => void;
+  onDeleteTag: (tagId: string) => void;
+  onEditTag: (tagId: string, tagData: Omit<Tag, 'id'>) => void;
   sortColumn: number;
   sortOrder: 'asc' | 'desc';
 }
 
-function TimeLogTable({ logs, onEdit, onDelete, onSort, sortColumn, sortOrder }: Props) {
+function TimeLogTable({ logs, tags, onEdit, onDelete, onSort, onTagChange, onCreateTag, onDeleteTag, onEditTag, sortColumn, sortOrder }: Props) {
   const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<number | null>(null);
 
   const getSortIcon = (column: number) => {
@@ -30,7 +36,7 @@ function TimeLogTable({ logs, onEdit, onDelete, onSort, sortColumn, sortOrder }:
             <th>Start Time</th>
             <th>End Time</th>
             <th onClick={() => onSort(1)} className="sortable">Duration {getSortIcon(1)}</th>
-            <th>Actions</th>
+            <th style={{ textAlign: 'right' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -50,6 +56,14 @@ function TimeLogTable({ logs, onEdit, onDelete, onSort, sortColumn, sortOrder }:
                   <td>{formatDuration(duration)}</td>
                   <td>
                     <div className="actions">
+                      <TagDropdown
+                        tags={tags}
+                        currentTagId={log.tagId}
+                        onTagChange={(tagId) => onTagChange(log, tagId)}
+                        onCreateNew={() => onCreateTag(log)}
+                        onDeleteTag={onDeleteTag}
+                        onEditTag={onEditTag}
+                      />
                       <button className="btn-edit" onClick={() => onEdit(log)} title="Edit">✎ Edit</button>
                       <button className="btn-delete" onClick={() => setDeleteConfirmIndex(index)} title="Delete">✕ Delete</button>
                     </div>
