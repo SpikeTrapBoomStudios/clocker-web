@@ -97,7 +97,7 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActive
     if (editingLog) {
       const index = logs.indexOf(editingLog);
       updatedLogs = [...logs];
-      updatedLogs[index] = log;
+      updatedLogs[index] = { ...log, tagId: editingLog.tagId };
     } else {
       updatedLogs = [...logs, log];
     }
