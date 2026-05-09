@@ -14,6 +14,7 @@ function App() {
   const [projects, setProjects] = useState<Project[]>(() => LocalStorage.loadProjects());
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [currentView, setCurrentView] = useState<'grid' | 'detail'>('grid');
+  const [logSyncVersion, setLogSyncVersion] = useState(0);
 
   const generateId = (name: string): string => {
     const sanitizedName = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
@@ -111,7 +112,8 @@ function App() {
         const loadedProjects = await Storage.loadProjects();
         setProjects(loadedProjects);
         LocalStorage.saveProjects(loadedProjects);
-        Storage.syncAllLogs(loadedProjects.map(project => project.id));
+        await Storage.syncAllLogs(loadedProjects.map(project => project.id));
+        setLogSyncVersion(v => v + 1);
       }
     });
   }, []);
@@ -129,6 +131,7 @@ function App() {
           onGoogleSignIn={() => signInWithPopup(auth, googleProvider)}
           onGithubSignIn={() => signInWithPopup(auth, githubProvider)}
           onSignOut={() => signOut(auth)}
+          logSyncVersion={logSyncVersion}
         />
       ) : selectedProject && (
         <DetailView

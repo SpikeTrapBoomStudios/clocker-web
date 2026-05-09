@@ -81,8 +81,8 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActive
     onActiveChange(!clockedIn);
   };
 
-  const handleDeleteRow = (index: number) => {
-    const updatedLogs = logs.filter((_, i) => i !== index);
+  const handleDeleteRow = (log: TimeLog) => {
+    const updatedLogs = logs.filter(existingLog => existingLog !== log);
     setLogs(updatedLogs);
     Storage.saveLogs(project.id, updatedLogs);
   };

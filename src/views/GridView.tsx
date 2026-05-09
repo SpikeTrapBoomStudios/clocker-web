@@ -31,9 +31,10 @@ interface Props {
   onGoogleSignIn: () => void;
   onGithubSignIn: () => void;
   onSignOut: () => void;
+  logSyncVersion: number;
 }
 
-function GridView({ projects, onProjectSelect, onAddProject, onDeleteProjects, onStarProject, user, onGoogleSignIn, onGithubSignIn, onSignOut }: Props) {
+function GridView({ projects, onProjectSelect, onAddProject, onDeleteProjects, onStarProject, user, onGoogleSignIn, onGithubSignIn, onSignOut, logSyncVersion }: Props) {
   const [showDialog, setShowDialog] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
@@ -60,7 +61,7 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProjects, o
       }, 0);
       return { id: project.id, totalSeconds, mostRecentDate };
     });
-  }, [projects]);
+  }, [projects, logSyncVersion]);
 
   const sortedProjects = useMemo(() => {
     const statsMap = new Map(projectStats.map(stats => [stats.id, stats]));
@@ -208,6 +209,7 @@ function GridView({ projects, onProjectSelect, onAddProject, onDeleteProjects, o
                       selected={selectedIds.has(project.id)}
                       mousePos={mousePos}
                       onStarToggle={() => onStarProject(project.id)}
+                      logSyncVersion={logSyncVersion}
                     />
                   </div>
                 ))

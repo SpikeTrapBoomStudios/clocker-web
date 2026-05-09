@@ -9,7 +9,7 @@ interface Props {
   logs: TimeLog[];
   tags: Tag[];
   onEdit: (log: TimeLog) => void;
-  onDelete: (index: number) => void;
+  onDelete: (log: TimeLog) => void;
   onSort: (column: number) => void;
   onTagChange: (log: TimeLog, tagId: string | null) => void;
   onCreateTag: (log: TimeLog) => void;
@@ -20,7 +20,7 @@ interface Props {
 }
 
 function TimeLogTable({ logs, tags, onEdit, onDelete, onSort, onTagChange, onCreateTag, onDeleteTag, onEditTag, sortColumn, sortOrder }: Props) {
-  const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<number | null>(null);
+  const [deleteConfirmLog, setDeleteConfirmLog] = useState<TimeLog | null>(null);
 
   const getSortIcon = (column: number) => {
     if (sortColumn !== column) return '⇅';
@@ -65,7 +65,7 @@ function TimeLogTable({ logs, tags, onEdit, onDelete, onSort, onTagChange, onCre
                         onEditTag={onEditTag}
                       />
                       <button className="btn-edit" onClick={() => onEdit(log)} title="Edit">✎ Edit</button>
-                      <button className="btn-delete" onClick={() => setDeleteConfirmIndex(index)} title="Delete">✕ Delete</button>
+                      <button className="btn-delete" onClick={() => setDeleteConfirmLog(log)} title="Delete">✕ Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -75,14 +75,14 @@ function TimeLogTable({ logs, tags, onEdit, onDelete, onSort, onTagChange, onCre
         </tbody>
       </table>
 
-      {deleteConfirmIndex !== null && (
+      {deleteConfirmLog !== null && (
         <ConfirmDialog
           message="Delete this entry?"
           onConfirm={() => {
-            onDelete(deleteConfirmIndex);
-            setDeleteConfirmIndex(null);
+            onDelete(deleteConfirmLog);
+            setDeleteConfirmLog(null);
           }}
-          onCancel={() => setDeleteConfirmIndex(null)}
+          onCancel={() => setDeleteConfirmLog(null)}
         />
       )}
     </div>

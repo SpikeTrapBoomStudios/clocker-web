@@ -48,7 +48,7 @@ function toFirestoreLog(log: TimeLog): FirestoreTimeLog {
     date: log.date.toISOString(),
     startTime: log.startTime.toISOString(),
     endTime: log.endTime?.toISOString() ?? null,
-    tagId: log.tagId,
+    ...(log.tagId !== undefined && { tagId: log.tagId }),
   };
 }
 

@@ -14,9 +14,10 @@ interface Props {
   selected: boolean;
   mousePos: { x: number; y: number } | null;
   onStarToggle: () => void;
+  logSyncVersion: number;
 }
 
-function ProjectTile({ project, onClick, selectMode, selected, mousePos, onStarToggle }: Props) {
+function ProjectTile({ project, onClick, selectMode, selected, mousePos, onStarToggle, logSyncVersion }: Props) {
   const [baseTotalSeconds, setBaseTotalSeconds] = useState(0);
   const [activeStartTime, setActiveStartTime] = useState<Date | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -31,7 +32,7 @@ function ProjectTile({ project, onClick, selectMode, selected, mousePos, onStarT
     setBaseTotalSeconds(base);
     setActiveStartTime(activeLog ? activeLog.startTime : null);
     setElapsedSeconds(activeLog ? Math.floor((new Date().getTime() - activeLog.startTime.getTime()) / 1000) : 0);
-  }, [project.id]);
+  }, [project.id, logSyncVersion]);
 
   useEffect(() => {
     if (!activeStartTime) return;

@@ -73,6 +73,22 @@
   font-weight: 500;
 }
 
+.time-log-table .active-row td {
+  border-right-color: rgba(93, 93, 93, 0.3);
+}
+
+.time-log-table .active-row .btn-edit {
+  border-color: rgba(160, 160, 160, 0.27);
+}
+
+.time-log-table .active-row .btn-tag {
+  border-color: rgba(160, 160, 160, 0.40) !important;
+}
+
+.time-log-table .active-row .btn-delete {
+  border-color: rgba(239, 68, 68, 0.47);
+}
+
 .empty-cell {
   text-align: center;
   color: var(--text-light);
