@@ -92,14 +92,14 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActive
     setEditingLog(null);
   };
 
-  const handleEditDialogSubmit = (log: TimeLog) => {
+  const handleEditDialogSubmit = (submittedLog: TimeLog) => {
     let updatedLogs: TimeLog[];
     if (editingLog) {
-      const index = logs.indexOf(editingLog);
-      updatedLogs = [...logs];
-      updatedLogs[index] = { ...log, tagId: editingLog.tagId };
+      updatedLogs = logs.map(existingLog =>
+        existingLog === editingLog ? { ...submittedLog, tagId: editingLog.tagId } : existingLog
+      );
     } else {
-      updatedLogs = [...logs, log];
+      updatedLogs = [...logs, submittedLog];
     }
     setLogs(updatedLogs);
     Storage.saveLogs(project.id, updatedLogs);
@@ -202,8 +202,10 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActive
   const getSortedLogs = (): TimeLog[] => {
     return [...logs].sort((firstLog, secondLog) => {
       if (sortColumn === 0) {
-        const diff = firstLog.date.getTime() - secondLog.date.getTime();
-        return sortOrder === 'asc' ? diff : -diff;
+        const dateDiff = firstLog.date.getTime() - secondLog.date.getTime();
+        if (dateDiff !== 0) return sortOrder === 'asc' ? dateDiff : -dateDiff;
+        const startTimeDiff = firstLog.startTime.getTime() - secondLog.startTime.getTime();
+        return sortOrder === 'asc' ? startTimeDiff : -startTimeDiff;
       } else {
         const diff = getDurationSeconds(firstLog.startTime, firstLog.endTime) - getDurationSeconds(secondLog.startTime, secondLog.endTime);
         return sortOrder === 'asc' ? diff : -diff;

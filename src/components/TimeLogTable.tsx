@@ -45,11 +45,11 @@ function TimeLogTable({ logs, tags, onEdit, onDelete, onSort, onTagChange, onCre
               <td colSpan={5} className="empty-cell">No time logs yet</td>
             </tr>
           ) : (
-            logs.map((log, index) => {
+            logs.map((log) => {
               const duration = getDurationSeconds(log.startTime, log.endTime);
               const active = isActive(log);
               return (
-                <tr key={index} className={active ? 'active-row' : ''}>
+                <tr key={log.startTime.getTime()} className={active ? 'active-row' : ''}>
                   <td>{formatDate(log.date)}</td>
                   <td>{formatTime(log.startTime)}</td>
                   <td>{active ? '(Active)' : formatTime(log.endTime)}</td>
