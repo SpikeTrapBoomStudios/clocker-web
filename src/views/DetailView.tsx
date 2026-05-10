@@ -199,10 +199,13 @@ function DetailView({ project, projects = [], onBack, onEdit, onDelete, onActive
       .sort((a, b) => b.seconds - a.seconds);
   };
 
+  const normalizeToStartOfDay = (date: Date): number =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+
   const getSortedLogs = (): TimeLog[] => {
     return [...logs].sort((firstLog, secondLog) => {
       if (sortColumn === 0) {
-        const dateDiff = firstLog.date.getTime() - secondLog.date.getTime();
+        const dateDiff = normalizeToStartOfDay(firstLog.date) - normalizeToStartOfDay(secondLog.date);
         if (dateDiff !== 0) return sortOrder === 'asc' ? dateDiff : -dateDiff;
         const startTimeDiff = firstLog.startTime.getTime() - secondLog.startTime.getTime();
         return sortOrder === 'asc' ? startTimeDiff : -startTimeDiff;
