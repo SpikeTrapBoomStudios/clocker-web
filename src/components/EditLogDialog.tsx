@@ -13,14 +13,21 @@ function EditLogDialog({ log, onClose, onSubmit }: Props) {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
 
+  const toLocalDateString = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     if (log) {
-      setDate(log.date.toISOString().split('T')[0]);
+      setDate(toLocalDateString(log.date));
       setStartTime(log.startTime.toTimeString().slice(0, 5));
       setEndTime(log.endTime ? log.endTime.toTimeString().slice(0, 5) : '');
     } else {
       const now = new Date();
-      setDate(now.toISOString().split('T')[0]);
+      setDate(toLocalDateString(now));
       setStartTime(now.toTimeString().slice(0, 5));
       setEndTime('');
     }
