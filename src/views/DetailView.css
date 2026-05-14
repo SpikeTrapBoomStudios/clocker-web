@@ -134,6 +134,22 @@
   font-size: 15.75px;
 }
 
+.btn-rollback {
+  background-color: transparent;
+  color: var(--text-light);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 15.75px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.btn-rollback:hover {
+  color: var(--text);
+  border-color: var(--text-light);
+}
+
 .total-section {
   display: flex;
   align-items: center;

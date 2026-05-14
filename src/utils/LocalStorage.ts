@@ -3,16 +3,43 @@ import { DEFAULT_DELETE_PHRASE, DEFAULT_INVERT_ORBIT, DEFAULT_ORBIT_STRENGTH, DE
 
 const PROJECTS_KEY = 'clocker_projects';
 const LOGS_PREFIX = 'clocker_logs_';
+const BACKUPS_PREFIX = 'clocker_backups_';
 const DELETE_PHRASE_KEY = 'clocker_delete_phrase';
 const ORBIT_STRENGTH_KEY = 'clocker_orbit_strength';
 const INVERT_ORBIT_KEY = 'clocker_invert_orbit';
 const SORT_METHOD_KEY = 'clocker_sort_method';
+
+const MAX_BACKUPS_PER_PROJECT = 5;
 
 interface SerializedTimeLog {
   date: string;
   startTime: string;
   endTime: string | null;
   tagId?: string;
+}
+
+interface SerializedBackup {
+  backupId: string;
+  timestamp: string;
+  logs: SerializedTimeLog[];
+}
+
+function serializeLog(log: TimeLog): SerializedTimeLog {
+  return {
+    date: log.date.toISOString(),
+    startTime: log.startTime.toISOString(),
+    endTime: log.endTime ? log.endTime.toISOString() : null,
+    ...(log.tagId !== undefined && { tagId: log.tagId }),
+  };
+}
+
+function deserializeLog(serializedLog: SerializedTimeLog): TimeLog {
+  return {
+    date: new Date(serializedLog.date),
+    startTime: new Date(serializedLog.startTime),
+    endTime: serializedLog.endTime ? new Date(serializedLog.endTime) : null,
+    tagId: serializedLog.tagId,
+  };
 }
 
 interface StoredProject {
@@ -88,5 +115,46 @@ export const LocalStorage = {
 
   setSortMethod(method: string): void {
     localStorage.setItem(SORT_METHOD_KEY, method);
+  },
+
+  // ── Backup system ────────────────────────────────────────────────────────────
+
+  createBackup(projectId: string, currentLogs: TimeLog[]): void {
+    const key = BACKUPS_PREFIX + projectId;
+    const raw = localStorage.getItem(key);
+    const existingBackups: SerializedBackup[] = raw ? JSON.parse(raw) : [];
+
+    const newBackup: SerializedBackup = {
+      backupId: `backup_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      timestamp: new Date().toISOString(),
+      logs: currentLogs.map(serializeLog),
+    };
+
+    existingBackups.push(newBackup);
+    if (existingBackups.length > MAX_BACKUPS_PER_PROJECT) existingBackups.shift(); // FIFO eviction
+
+    localStorage.setItem(key, JSON.stringify(existingBackups));
+  },
+
+  getBackupCount(projectId: string): number {
+    const raw = localStorage.getItem(BACKUPS_PREFIX + projectId);
+    if (!raw) return 0;
+    return (JSON.parse(raw) as SerializedBackup[]).length;
+  },
+
+  popLatestBackup(projectId: string): TimeLog[] | null {
+    const key = BACKUPS_PREFIX + projectId;
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const backups: SerializedBackup[] = JSON.parse(raw);
+    if (backups.length === 0) return null;
+
+    const latestBackup = backups.pop()!; // remove most recent — backup is now destroyed
+    localStorage.setItem(key, JSON.stringify(backups));
+    return latestBackup.logs.map(deserializeLog);
+  },
+
+  deleteProjectBackups(projectId: string): void {
+    localStorage.removeItem(BACKUPS_PREFIX + projectId);
   },
 };

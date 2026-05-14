@@ -68,6 +68,7 @@ function App() {
     const updatedProjects = projects.filter(project => project.id !== projectId);
     setProjects(updatedProjects);
     Storage.saveProjects(updatedProjects);
+    LocalStorage.deleteProjectBackups(projectId);
     setSelectedProject(null);
     setCurrentView('grid');
   };
